@@ -1,5 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:netease_cloud_music/Icon/Icon.dart';
+import 'package:netease_cloud_music/subView/MyMusic.dart';
+import 'package:netease_cloud_music/subView/account.dart';
 import 'package:netease_cloud_music/subView/recommend.dart';
 import 'package:smtc_windows/smtc_windows.dart';
 import 'package:window_manager/window_manager.dart';
@@ -90,9 +92,7 @@ class NavigationViewRoute extends StatefulWidget {
       title: Text('我的音乐'),
       icon: SizedBox(),
       //TODO 添加我的音乐的子项
-      items: <NavigationPaneItem>[
-        PaneItem(icon: Icon(MyIcon.appIcon), body: Placeholder())
-      ],
+      items: myMusicNavigationPaneItems,
       body: Placeholder(),
     ),
     PaneItem(
@@ -125,11 +125,15 @@ class NavigationViewRoute extends StatefulWidget {
 class _NavigationViewRouteState extends State<NavigationViewRoute> {
   int seletedIndex = 0;
 
+  _openSettingWindow() {
+    //TODO 设置跳转  方法
+  }
+
   @override
   Widget build(BuildContext context) {
     return NavigationView(
       appBar: NavigationAppBar(
-        leading: Icon(
+        leading: const Icon(
           MyIcon.appIcon2,
           size: 35,
           fill: 1,
@@ -139,11 +143,41 @@ class _NavigationViewRouteState extends State<NavigationViewRoute> {
         actions: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Account(),
+            IconButton(
+                icon: Icon(
+                  MyIcon.setting,
+                  size: 20,
+                  color: Colors.grey[80],
+                ),
+                onPressed: () {
+                  //TODO 打开设置窗口
+                }),
+            SizedBox(
+              width: 15,
+            ),
+            RotatedBox(
+              quarterTurns: 1,
+              child: SizedBox(
+                width: 40,
+                child: Divider(
+                  style: DividerThemeData(
+                      thickness: 1,
+                      decoration: BoxDecoration(color: Colors.grey[130])),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 15,
+            ),
             widget.WindowsButtons,
           ],
         ),
       ),
       pane: NavigationPane(
+        indicator: StickyNavigationIndicator(
+          color: Colors.white,
+        ),
         size: NavigationPaneSize(
           openMaxWidth: 175,
           compactWidth: 50,

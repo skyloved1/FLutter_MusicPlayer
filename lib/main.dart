@@ -50,12 +50,13 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return FluentApp(
+      locale: const Locale("zh", "CN"),
       theme: FluentThemeData(
           acrylicBackgroundColor: Color(0x13131a),
           fontFamily: "等线",
           accentColor: Colors.red,
           navigationPaneTheme: NavigationPaneThemeData(
-            backgroundColor: Colors.transparent,
+            backgroundColor: Colors.white,
             selectedIconColor: WidgetStateProperty.all(Colors.red),
           )),
       darkTheme: FluentThemeData(
