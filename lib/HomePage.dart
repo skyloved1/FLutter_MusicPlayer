@@ -2,8 +2,8 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:netease_cloud_music/Icon/Icon.dart';
 import 'package:netease_cloud_music/subView/MyMusic.dart';
 import 'package:netease_cloud_music/subView/account.dart';
+import 'package:netease_cloud_music/subView/bottomMusicPlayer.dart';
 import 'package:netease_cloud_music/subView/recommend.dart';
-import 'package:smtc_windows/smtc_windows.dart';
 import 'package:window_manager/window_manager.dart';
 
 class HomePage extends StatefulWidget {
@@ -14,35 +14,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late SMTCWindows smtc;
-
   @override
   void initState() {
     super.initState();
-    smtc = SMTCWindows(
-      enabled: true,
-      metadata: MusicMetadata(
-        title: '网易云音乐',
-        artist: '网易云音乐',
-        album: '网易云音乐',
-        albumArtist: '网易云音乐',
-      ),
-      config: const SMTCConfig(
-        fastForwardEnabled: true,
-        nextEnabled: true,
-        pauseEnabled: true,
-        playEnabled: true,
-        rewindEnabled: true,
-        prevEnabled: true,
-        stopEnabled: true,
-      ),
-    );
   }
 
   @override
   void dispose() {
-    // Dispose SMTC
-    smtc.dispose();
     super.dispose();
   }
 
@@ -56,7 +34,7 @@ class _HomePageState extends State<HomePage> {
           alignment: Alignment.bottomCenter,
           child: SizedBox(
             height: 76,
-            child: Placeholder(),
+            child: BottomMusicPlayer(),
           ),
         )
       ],
