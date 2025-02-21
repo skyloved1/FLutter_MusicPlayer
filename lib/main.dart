@@ -25,7 +25,7 @@ void main() async {
     title: "网易云音乐",
   );
   windowManager.waitUntilReadyToShow(windowOptions, () async {
-    await windowManager.setIcon("assets\\img\\neteaseIcon.png");
+    await windowManager.setIcon("assets/img/appicon.ico");
     await windowManager.show();
     await windowManager.focus();
   });

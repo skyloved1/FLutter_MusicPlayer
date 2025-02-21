@@ -20,6 +20,13 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     smtc = SMTCWindows(
+      enabled: true,
+      metadata: MusicMetadata(
+        title: '网易云音乐',
+        artist: '网易云音乐',
+        album: '网易云音乐',
+        albumArtist: '网易云音乐',
+      ),
       config: const SMTCConfig(
         fastForwardEnabled: true,
         nextEnabled: true,
