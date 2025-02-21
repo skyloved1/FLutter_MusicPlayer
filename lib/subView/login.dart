@@ -27,10 +27,12 @@ class _LoginWithQRCodeState extends State<LoginWithQRCode> {
   late StreamController<Map<String, dynamic>> qrCodeStreamController;
   int lastQRCodeStatus = 0;
   late Timer _pollingTimer;
+  late SharedPreferences prefs;
 
   @override
   void initState() {
     super.initState();
+    initSharedPreferences();
     _generateSessionKey();
     qrCodeStreamController = StreamController<Map<String, dynamic>>();
     _pollingTimer = _pollingQRCodeStatus();
@@ -82,81 +84,113 @@ class _LoginWithQRCodeState extends State<LoginWithQRCode> {
     super.dispose();
   }
 
+  initSharedPreferences() async {
+    prefs = await SharedPreferences.getInstance();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ContentDialog(
-      title: const Text('Scan QR code to login'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            'Open your Netease Cloud Music app, scan the QR code to login',
-          ),
-          const SizedBox(height: 10),
-          SizedBox(
-            width: 200,
-            height: 200,
-            child: StreamBuilder(
-              stream: qrCodeStreamController.stream,
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return const Text("QR Stream has Error");
-                }
+    return FutureBuilder(
+      future: initSharedPreferences(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          // If already logged in, show a dialog
+          if (prefs.getString("cookie") != null) {
+            return ContentDialog(
+              title: const Text("You are already logged in"),
+              content: const Text(
+                  "You are already logged in, no need to log in again"),
+              actions: [
+                Button(
+                  child: const Text("OK"),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            );
+          }
+          // Otherwise, show the QR code login dialog
+          return ContentDialog(
+            title: const Text('Scan QR code to login'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Open your Netease Cloud Music app, scan the QR code to login',
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: 200,
+                  height: 200,
+                  child: StreamBuilder(
+                    stream: qrCodeStreamController.stream,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return const Text("QR Stream has Error");
+                      }
 
-                if (snapshot.hasData && snapshot.data != null) {
-                  if (snapshot.data!["code"] == 803) {
-                    print("login success，即将存储cookie");
-                    SharedPreferences.getInstance().then((prefs) {
-                      print("the cookie is ${snapshot.data!["cookie"]}");
-                      prefs.setString(
-                          "cookie", jsonEncode(snapshot.data!["cookie"]));
-                    });
-                    _pollingTimer.cancel();
-                    qrCodeStreamController.close();
-                    return const Text("Login success");
-                  }
-                  if (snapshot.data!["code"] == 801) {
-                    return GenerateQRCode(qrCodeData: _fetchQRCodeData());
-                  }
-                  if (snapshot.data!["code"] == 802) {
-                    _showWaitToConfirmQRCodeDialog(snapshot.data!["code"]);
-                  }
-                  if (snapshot.data!["code"] == 800) {
-                    _pollingTimer.cancel();
-                    return FilledButton(
-                      child: const Text("refresh QR code"),
-                      onPressed: () {
-                        setState(() {
-                          _generateSessionKey();
-                          _pollingTimer = _pollingQRCodeStatus();
-                        });
-                      },
-                    );
-                  }
-                  lastQRCodeStatus = snapshot.data!["code"];
-                  print("snapshot.data!['code'] is ${snapshot.data!["code"]}");
-                  return ErrrorInfoBar(
-                    close: () {
-                      Navigator.pop(context);
+                      if (snapshot.hasData && snapshot.data != null) {
+                        if (snapshot.data!["code"] == 803) {
+                          print("login success, saving cookie");
+                          SharedPreferences.getInstance().then((prefs) {
+                            print("the cookie is ${snapshot.data!["cookie"]}");
+                            prefs.setString(
+                                "cookie", jsonEncode(snapshot.data!["cookie"]));
+                          });
+                          _pollingTimer.cancel();
+                          qrCodeStreamController.close();
+                          return const Text("Login success");
+                        }
+                        if (snapshot.data!["code"] == 801) {
+                          return GenerateQRCode(qrCodeData: _fetchQRCodeData());
+                        }
+                        if (snapshot.data!["code"] == 802) {
+                          _showWaitToConfirmQRCodeDialog(
+                              snapshot.data!["code"]);
+                        }
+                        if (snapshot.data!["code"] == 800) {
+                          _pollingTimer.cancel();
+                          return FilledButton(
+                            child: const Text("refresh QR code"),
+                            onPressed: () {
+                              setState(() {
+                                _generateSessionKey();
+                                _pollingTimer = _pollingQRCodeStatus();
+                              });
+                            },
+                          );
+                        }
+                        lastQRCodeStatus = snapshot.data!["code"];
+                        print(
+                            "snapshot.data!['code'] is ${snapshot.data!["code"]}");
+                        return ErrrorInfoBar(
+                          close: () {
+                            Navigator.pop(context);
+                          },
+                          context: NavigationView.of(context).context,
+                        );
+                      } else {
+                        return const ProgressRing();
+                      }
                     },
-                    context: NavigationView.of(context).context,
-                  );
-                } else {
-                  return const ProgressRing();
-                }
-              },
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
-      actions: [
-        Button(
-          child: const Text('Cancel'),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ],
+            actions: [
+              Button(
+                child: const Text('Cancel'),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        } else {
+          return const Center(child: ProgressRing());
+        }
+      },
     );
   }
 }
