@@ -132,6 +132,11 @@ class NavigationViewRoute extends StatefulWidget {
 class _NavigationViewRouteState extends State<NavigationViewRoute> {
   int seletedIndex = 0;
 
+  @override
+  void initState() {
+    super.initState();
+  }
+
   _openSettingWindow() {
     //TODO 设置跳转  方法
   }
