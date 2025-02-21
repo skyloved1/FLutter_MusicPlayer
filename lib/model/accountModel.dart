@@ -1,12 +1,12 @@
-class DataModel {
+class UserModel {
   final int code;
   final Account account;
   final Profile profile;
 
-  DataModel({required this.code, required this.account, required this.profile});
+  UserModel({required this.code, required this.account, required this.profile});
 
-  factory DataModel.fromJson(Map<String, dynamic> json) {
-    return DataModel(
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
       code: json['code'],
       account: Account.fromJson(json['account']),
       profile: Profile.fromJson(json['profile']),
@@ -28,7 +28,6 @@ class Account {
   final int vipType;
   final bool anonimousUser;
   final bool paidFee;
-
   Account({
     required this.id,
     required this.userName,

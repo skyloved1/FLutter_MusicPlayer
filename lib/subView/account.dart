@@ -2,6 +2,8 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:netease_cloud_music/subView/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../globalVariable.dart';
+
 class Account extends StatefulWidget {
   Account({super.key});
 
@@ -11,30 +13,26 @@ class Account extends StatefulWidget {
 
 class _AccountState extends State<Account> {
   bool _loginState = false;
-  late final SharedPreferences _prefs;
 
   @override
   void initState() {
     super.initState();
-    initSharedPreferences();
+    if (userModel != null) {
+      _loginState = true;
+    }
   }
 
-  void initSharedPreferences() async {
-    _prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _loginState = _prefs.getBool("_loginState") ?? false;
-    });
-  }
-
-  Future<String> _showContentDialog(BuildContext context) async {
+  _showContentDialog(BuildContext context) async {
     final result = await showDialog<String>(
       context: context,
       builder: (context) => LoginWithQRCode(),
     );
-    if (result != null) {
-      print('The user deleted the file');
+    if (result == "success") {
+      _loginState = true;
     }
-    return result ?? '';
+    if (result == "failure") {
+      _loginState = false;
+    }
   }
 
   @override
@@ -47,26 +45,40 @@ class _AccountState extends State<Account> {
                 size: 20,
               ),
               onPressed: () async {
-                //TODO: 跳转到二维码登入页面并存储登入状态
-                _showContentDialog(context);
+                if ((await SharedPreferences.getInstance()).get("cookie") ==
+                    null) {
+                  _showContentDialog(context);
+                }
+                setState(() {
+                  _loginState = true;
+                });
               })
-          : CircleAvatar(),
+          : CircleAvatar(
+              backgroundImage: NetworkImage(userModel!.profile.avatarUrl),
+              radius: 15,
+            ),
       HyperlinkButton(
         child: SizedBox(
           //width: 200,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("UserName"),
+              Text(
+                _loginState ? userModel!.profile.nickname : "未登录",
+                style: TextStyle(color: Colors.white),
+              ),
               SizedBox(width: 5),
               Icon(
                 FluentIcons.chevron_down_med,
                 size: 10,
+                color: Colors.white,
               ),
             ],
           ),
         ),
-        onPressed: () {},
+        onPressed: () {
+          //TODO 登入后的界面
+        },
       )
     ]);
   }

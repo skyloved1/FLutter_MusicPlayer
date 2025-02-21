@@ -6,6 +6,8 @@ import 'package:dio/dio.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../globalVariable.dart';
+import '../model/accountModel.dart';
 import 'errorInfoBar.dart';
 
 class LoginWithQRCode extends StatefulWidget {
@@ -16,7 +18,6 @@ class LoginWithQRCode extends StatefulWidget {
 }
 
 class _LoginWithQRCodeState extends State<LoginWithQRCode> {
-  final String apiPrefix = "http://localhost:3000";
   final Dio dio = Dio();
   late int _timeStamp;
   late String sessionKey;
@@ -77,6 +78,14 @@ class _LoginWithQRCodeState extends State<LoginWithQRCode> {
         });
   }
 
+  _createUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final response = await Dio().get("$apiPrefix/user/account",
+        queryParameters: {"cookie": prefs.get("cookie")});
+    userModel = UserModel.fromJson(response.data);
+    prefs.setString("userID", userModel!.account.id.toString());
+  }
+
   @override
   void dispose() {
     _pollingTimer.cancel();
@@ -90,107 +99,94 @@ class _LoginWithQRCodeState extends State<LoginWithQRCode> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: initSharedPreferences(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          // If already logged in, show a dialog
-          if (prefs.getString("cookie") != null) {
-            return ContentDialog(
-              title: const Text("You are already logged in"),
-              content: const Text(
-                  "You are already logged in, no need to log in again"),
-              actions: [
-                Button(
-                  child: const Text("OK"),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
-            );
-          }
-          // Otherwise, show the QR code login dialog
-          return ContentDialog(
-            title: const Text('Scan QR code to login'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Open your Netease Cloud Music app, scan the QR code to login',
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: 200,
-                  height: 200,
-                  child: StreamBuilder(
-                    stream: qrCodeStreamController.stream,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        return const Text("QR Stream has Error");
-                      }
+    return ContentDialog(
+      title: const Text('Scan QR code to login'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            'Open your Netease Cloud Music app, scan the QR code to login',
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: 200,
+            height: 200,
+            child: StreamBuilder(
+              stream: qrCodeStreamController.stream,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return const Text("QR Stream has Error");
+                }
 
-                      if (snapshot.hasData && snapshot.data != null) {
-                        if (snapshot.data!["code"] == 803) {
-                          print("login success, saving cookie");
-                          SharedPreferences.getInstance().then((prefs) {
-                            print("the cookie is ${snapshot.data!["cookie"]}");
-                            prefs.setString(
-                                "cookie", jsonEncode(snapshot.data!["cookie"]));
-                          });
-                          _pollingTimer.cancel();
-                          qrCodeStreamController.close();
-                          return const Text("Login success");
-                        }
-                        if (snapshot.data!["code"] == 801) {
-                          return GenerateQRCode(qrCodeData: _fetchQRCodeData());
-                        }
-                        if (snapshot.data!["code"] == 802) {
-                          _showWaitToConfirmQRCodeDialog(
-                              snapshot.data!["code"]);
-                        }
-                        if (snapshot.data!["code"] == 800) {
-                          _pollingTimer.cancel();
-                          return FilledButton(
-                            child: const Text("refresh QR code"),
-                            onPressed: () {
-                              setState(() {
-                                _generateSessionKey();
-                                _pollingTimer = _pollingQRCodeStatus();
-                              });
-                            },
-                          );
-                        }
-                        lastQRCodeStatus = snapshot.data!["code"];
-                        print(
-                            "snapshot.data!['code'] is ${snapshot.data!["code"]}");
-                        return ErrrorInfoBar(
-                          close: () {
-                            Navigator.pop(context);
+                if (snapshot.hasData && snapshot.data != null) {
+                  if (snapshot.data!["code"] == 803) {
+                    _pollingTimer.cancel();
+                    qrCodeStreamController.close();
+                    print("login success, saving cookie");
+                    SharedPreferences.getInstance().then((prefs) {
+                      print("the cookie is ${snapshot.data!["cookie"]}");
+                      prefs.setString(
+                          "cookie", jsonEncode(snapshot.data!["cookie"]));
+                    });
+
+                    // createUserData
+                    _createUserData();
+
+                    return ContentDialog(
+                      title: const Text("Login success"),
+                      content: const Text("You have logged in successfully"),
+                      actions: [
+                        Button(
+                          child: const Text("OK"),
+                          onPressed: () {
+                            Navigator.pop(context, "success");
                           },
-                          context: NavigationView.of(context).context,
-                        );
-                      } else {
-                        return const ProgressRing();
-                      }
+                        ),
+                      ],
+                    );
+                  }
+                  if (snapshot.data!["code"] == 801) {
+                    return GenerateQRCode(qrCodeData: _fetchQRCodeData());
+                  }
+                  if (snapshot.data!["code"] == 802) {
+                    _showWaitToConfirmQRCodeDialog(snapshot.data!["code"]);
+                  }
+                  if (snapshot.data!["code"] == 800) {
+                    _pollingTimer.cancel();
+                    return FilledButton(
+                      child: const Text("refresh QR code"),
+                      onPressed: () {
+                        setState(() {
+                          _generateSessionKey();
+                          _pollingTimer = _pollingQRCodeStatus();
+                        });
+                      },
+                    );
+                  }
+                  lastQRCodeStatus = snapshot.data!["code"];
+                  print("snapshot.data!['code'] is ${snapshot.data!["code"]}");
+                  return ErrrorInfoBar(
+                    close: () {
+                      Navigator.pop(context);
                     },
-                  ),
-                ),
-              ],
+                    context: NavigationView.of(context).context,
+                  );
+                } else {
+                  return const ProgressRing();
+                }
+              },
             ),
-            actions: [
-              Button(
-                child: const Text('Cancel'),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          );
-        } else {
-          return const Center(child: ProgressRing());
-        }
-      },
+          ),
+        ],
+      ),
+      actions: [
+        Button(
+          child: const Text('Cancel'),
+          onPressed: () {
+            Navigator.pop(context, "failure");
+          },
+        ),
+      ],
     );
   }
 }
