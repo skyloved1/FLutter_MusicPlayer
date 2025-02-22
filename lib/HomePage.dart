@@ -1,9 +1,12 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart' as material;
 import 'package:netease_cloud_music/Icon/Icon.dart';
+import 'package:netease_cloud_music/provider/loginProvider.dart';
 import 'package:netease_cloud_music/subView/MyMusic.dart';
-import 'package:netease_cloud_music/subView/account.dart';
 import 'package:netease_cloud_music/subView/bottomMusicPlayer.dart';
+import 'package:netease_cloud_music/subView/loginPage.dart';
 import 'package:netease_cloud_music/subView/recommend.dart';
+import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
 class HomePage extends StatefulWidget {
@@ -133,7 +136,38 @@ class _NavigationViewRouteState extends State<NavigationViewRoute> {
         actions: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Account(),
+            Consumer<LoginProvider>(
+              builder: (context, loginProvider, child) {
+                return FutureBuilder<String>(
+                  future: loginProvider.getAvatar(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircleAvatar(
+                        child: ProgressRing(),
+                      );
+                    } else if (snapshot.hasError) {
+                      return CircleAvatar(
+                        child: Icon(FluentIcons.error),
+                      );
+                    } else {
+                      return snapshot.data != null
+                          ? CircleAvatar(
+                              backgroundImage: NetworkImage(snapshot.data!),
+                            )
+                          : CircleAvatar(
+                              child: Icon(FluentIcons.temporary_user),
+                            );
+                    }
+                  },
+                );
+              },
+            ),
+            material.ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                      context: context, builder: (context) => LoginPage());
+                },
+                child: Text("登录")),
             IconButton(
                 icon: Icon(
                   MyIcon.setting,

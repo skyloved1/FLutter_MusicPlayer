@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:netease_cloud_music/HomePage.dart';
+import 'package:netease_cloud_music/provider/loginProvider.dart';
+import 'package:provider/provider.dart';
 import 'package:smtc_windows/smtc_windows.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -30,7 +32,11 @@ void main() async {
     await windowManager.focus();
   });
 
-  runApp(MyApp());
+  runApp(ChangeNotifierProvider(
+      create: (BuildContext context) {
+        return LoginProvider();
+      },
+      child: MyApp()));
 }
 
 class MyApp extends StatefulWidget {
