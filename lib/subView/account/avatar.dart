@@ -1,7 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:provider/provider.dart';
 
-import '../provider/loginProvider.dart';
+import '../../provider/loginProvider.dart';
 import 'loginPage.dart';
 
 class Avatar extends StatelessWidget {

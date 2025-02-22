@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smtc_windows/smtc_windows.dart';
 
-import '../provider/bottomMusicPlayerProvider.dart';
+import '../../provider/bottomMusicPlayerProvider.dart';
 
 class BottomMusicPlayer extends StatefulWidget {
   static BottomMusicPlayer? _instance;
@@ -195,7 +195,8 @@ class _BottomMusicPlayerState extends State<BottomMusicPlayer>
                   return Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 64, vertical: 4),
                         child: IconTheme(
                           data: IconThemeData(
                             color: Colors.white,
@@ -230,7 +231,6 @@ class _BottomMusicPlayerState extends State<BottomMusicPlayer>
                               ) {
                                 return IconButton(
                                   icon: CircleAvatar(
-                                    backgroundColor: Colors.red,
                                     child: Icon(
                                         size: 24,
                                         color: Colors.white,

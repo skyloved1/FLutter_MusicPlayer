@@ -1,9 +1,9 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:netease_cloud_music/Icon/Icon.dart';
-import 'package:netease_cloud_music/subView/MyMusic.dart';
-import 'package:netease_cloud_music/subView/avatar.dart';
-import 'package:netease_cloud_music/subView/bottomMusicPlayer.dart';
-import 'package:netease_cloud_music/subView/recommend.dart';
+import 'package:netease_cloud_music/subView/account/avatar.dart';
+import 'package:netease_cloud_music/subView/bottom/bottomMusicPlayer.dart';
+import 'package:netease_cloud_music/subView/homePaneItemBody/MyMusic.dart';
+import 'package:netease_cloud_music/subView/homePaneItemBody/recommend.dart';
 import 'package:window_manager/window_manager.dart';
 
 class HomePage extends StatefulWidget {
