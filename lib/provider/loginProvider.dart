@@ -65,4 +65,6 @@ class LoginProvider with ChangeNotifier {
   }
 
   String? get avatarUrl => prefs.getString("avatarUrl");
+
+  get isLogin => _isLoggedIn;
 }

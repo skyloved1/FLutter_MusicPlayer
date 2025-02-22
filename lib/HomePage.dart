@@ -1,12 +1,9 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/material.dart' as material;
 import 'package:netease_cloud_music/Icon/Icon.dart';
-import 'package:netease_cloud_music/provider/loginProvider.dart';
 import 'package:netease_cloud_music/subView/MyMusic.dart';
+import 'package:netease_cloud_music/subView/avatar.dart';
 import 'package:netease_cloud_music/subView/bottomMusicPlayer.dart';
-import 'package:netease_cloud_music/subView/loginPage.dart';
 import 'package:netease_cloud_music/subView/recommend.dart';
-import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
 class HomePage extends StatefulWidget {
@@ -92,6 +89,7 @@ class NavigationViewRoute extends StatefulWidget {
     ),
   ];
 
+  /// **为了避免重复创建，将状态类用到的组件提取到这里**
   var WindowsButtons = WindowsButton();
   var title = DragToMoveArea(
     child: Align(
@@ -105,6 +103,16 @@ class NavigationViewRoute extends StatefulWidget {
       ),
     ),
   );
+  var avatar = AvatarWithLoginAndOut();
+  var setting = IconButton(
+      icon: Icon(
+        MyIcon.setting,
+        size: 20,
+        color: Colors.grey[80],
+      ),
+      onPressed: () {
+        //TODO 打开设置窗口
+      });
 
   @override
   State<NavigationViewRoute> createState() => _NavigationViewRouteState();
@@ -136,47 +144,8 @@ class _NavigationViewRouteState extends State<NavigationViewRoute> {
         actions: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Consumer<LoginProvider>(
-              builder: (context, loginProvider, child) {
-                return FutureBuilder<String>(
-                  future: loginProvider.getAvatar(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircleAvatar(
-                        child: ProgressRing(),
-                      );
-                    } else if (snapshot.hasError) {
-                      return CircleAvatar(
-                        child: Icon(FluentIcons.error),
-                      );
-                    } else {
-                      return snapshot.data != null
-                          ? CircleAvatar(
-                              backgroundImage: NetworkImage(snapshot.data!),
-                            )
-                          : CircleAvatar(
-                              child: Icon(FluentIcons.temporary_user),
-                            );
-                    }
-                  },
-                );
-              },
-            ),
-            material.ElevatedButton(
-                onPressed: () {
-                  showDialog(
-                      context: context, builder: (context) => LoginPage());
-                },
-                child: Text("登录")),
-            IconButton(
-                icon: Icon(
-                  MyIcon.setting,
-                  size: 20,
-                  color: Colors.grey[80],
-                ),
-                onPressed: () {
-                  //TODO 打开设置窗口
-                }),
+            widget.avatar,
+            widget.setting,
             SizedBox(
               width: 15,
             ),
@@ -234,7 +203,7 @@ class WindowsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
         width: width,
         height: height,
         child: WindowCaption(
