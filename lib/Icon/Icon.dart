@@ -9,4 +9,18 @@ class MyIcon {
       IconData(0xe601, fontFamily: "musicIcon");
   static const IconData setting = IconData(0xe61c, fontFamily: "musicIcon");
   static const IconData home = IconData(0xe63b, fontFamily: "musicIcon");
+  static const IconData like = IconData(0xe69e, fontFamily: "musicIcon");
+  static const IconData lastSong = IconData(0xe608, fontFamily: "musicIcon");
+  static const IconData nextSong = IconData(0xe609, fontFamily: "musicIcon");
+  static const IconData play = IconData(0xe60f, fontFamily: "musicIcon");
+  static const IconData pause = IconData(0xe610, fontFamily: "musicIcon");
+}
+
+class PlayModeIcon {
+  static const IconData listLoop = IconData(0xe606, fontFamily: "musicIcon");
+  static const IconData singleLoop = IconData(0xe6ae, fontFamily: "musicIcon");
+  static const IconData randomPlay = IconData(0xe622, fontFamily: "musicIcon");
+  static const IconData sequencePlay =
+      IconData(0xe60a, fontFamily: "musicIcon");
+  static const IconData heartPatten = IconData(0xe61a, fontFamily: "musicIcon");
 }

@@ -47,7 +47,7 @@ class NavigationViewRoute extends StatefulWidget {
     super.key,
   });
 
-  List<NavigationPaneItem> items = <NavigationPaneItem>[
+  final List<NavigationPaneItem> items = <NavigationPaneItem>[
     PaneItem(
       icon: Icon(MyIcon.appIcon),
       title: Text('推荐'),
@@ -90,8 +90,8 @@ class NavigationViewRoute extends StatefulWidget {
   ];
 
   /// **为了避免重复创建，将状态类用到的组件提取到这里**
-  var WindowsButtons = WindowsButton();
-  var title = DragToMoveArea(
+  final WindowsButtons = WindowsButton();
+  final title = DragToMoveArea(
     child: Align(
       alignment: Alignment.centerLeft,
       child: Text(
@@ -103,8 +103,8 @@ class NavigationViewRoute extends StatefulWidget {
       ),
     ),
   );
-  var avatar = AvatarWithLoginAndOut();
-  var setting = IconButton(
+  final avatar = AvatarWithLoginAndOut();
+  final setting = IconButton(
       icon: Icon(
         MyIcon.setting,
         size: 20,

@@ -1,5 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:netease_cloud_music/Icon/Icon.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smtc_windows/smtc_windows.dart';
@@ -50,9 +51,8 @@ class _BottomMusicPlayerState extends State<BottomMusicPlayer>
       duration: Duration(seconds: 20),
       lowerBound: 0,
       upperBound: 2 * 3.1415926,
-    )
-      ..repeat()
-      ..stop(canceled: false);
+    )..repeat();
+    //..stop(canceled: false);
     smtc = SMTCWindows(
       enabled: true,
       metadata: MusicMetadata(
@@ -83,6 +83,7 @@ class _BottomMusicPlayerState extends State<BottomMusicPlayer>
 
   @override
   Widget build(BuildContext context) {
+    print('build bottom music player/n 这个不应该出现，即不应该重建整个底部音乐播放器');
     return ChangeNotifierProvider(
       create: (_) => BottomMusicPlayerProvider(),
       child: ColoredBox(
@@ -101,75 +102,60 @@ class _BottomMusicPlayerState extends State<BottomMusicPlayer>
                     SizedBox(
                       width: 75,
                       height: 75,
-                      child: AnimatedBuilder(
-                        animation: _animationController,
-                        builder: (context, child) {
-                          return Transform.rotate(
-                            angle: playerState == PlayerState.playing
-                                ? _animationController.value
-                                : 0,
-                            child: MouseRegion(
-                              onHover: (_) {
-                                context
-                                    .read<BottomMusicPlayerProvider>()
-                                    .setHover(true);
-                              },
-                              onExit: (_) {
-                                context
-                                    .read<BottomMusicPlayerProvider>()
-                                    .setHover(false);
-                              },
-                              child: GestureDetector(
-                                onTap: () {
-                                  //TODO 跳转到全屏播放页面
-                                  print("跳转到全屏播放页面");
-                                },
-                                child: Consumer<BottomMusicPlayerProvider>(
-                                  builder: (context, provider, child) {
-                                    return ColoredBox(
-                                      color: provider.onHover
-                                          ? Color.fromRGBO(115, 115, 115, 1.0)
-                                          : Color.fromRGBO(45, 45, 56, 1),
-                                      child: Stack(
-                                        children: [
-                                          Center(
-                                            child: Container(
-                                              width: 75,
-                                              height: 75,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: Color.fromRGBO(
-                                                    45, 45, 56, 1),
-                                              ),
-                                              child: Image.asset(
-                                                  "assets/img/black.png"),
-                                            ),
-                                          ),
-                                          Center(
-                                            child: provider.musicAvatar != null
-                                                ? CircleAvatar(
-                                                    backgroundImage:
-                                                        NetworkImage(provider
-                                                            .musicAvatar!),
-                                                  )
-                                                : CircleAvatar(
-                                                    child: const Icon(
-                                                        FluentIcons.music_note),
-                                                  ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                          );
+                      child: IconButton(
+                        onPressed: () {
+                          //TODO 跳转到全屏播放页面
                         },
+                        icon: Consumer<BottomMusicPlayerProvider>(
+                          builder: (context, provider, child) {
+                            if (provider.playerState == PlayerState.playing) {
+                              _animationController.repeat();
+                            } else {
+                              _animationController.stop();
+                            }
+                            return AnimatedBuilder(
+                              animation: _animationController,
+                              builder: (context, child) {
+                                return Transform.rotate(
+                                  angle: _animationController.value,
+                                  child: Stack(
+                                    children: [
+                                      Center(
+                                        child: Container(
+                                          width: 75,
+                                          height: 75,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color:
+                                                Color.fromRGBO(45, 45, 56, 1),
+                                          ),
+                                          child: Image.asset(
+                                              "assets/img/black.png"),
+                                        ),
+                                      ),
+                                      Center(
+                                        child: provider.musicAvatar != null
+                                            ? CircleAvatar(
+                                                backgroundImage: NetworkImage(
+                                                    provider.musicAvatar!),
+                                              )
+                                            : CircleAvatar(
+                                                child: const Icon(
+                                                    FluentIcons.music_note),
+                                              ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
                       ),
                     ),
                     Consumer<BottomMusicPlayerProvider>(
                       builder: (context, provider, child) {
+                        print("provider.musicName: ${provider.musicName}");
                         return Positioned(
                           left: 85,
                           child: SizedBox(
@@ -204,7 +190,103 @@ class _BottomMusicPlayerState extends State<BottomMusicPlayer>
             SizedBox(
               width: 400,
               height: 75,
-              child: Placeholder(),
+              child: Consumer<BottomMusicPlayerProvider>(
+                builder: (context, bottomMusicPlayerProvider, child) {
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: IconTheme(
+                          data: IconThemeData(
+                            color: Colors.white,
+                            size: 28,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              IconButton(
+                                icon: Icon(
+                                  MyIcon.like,
+                                  size: 20,
+                                ),
+                                onPressed: () {
+                                  //TODO 将该歌曲添加到我喜欢的音乐
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  MyIcon.lastSong,
+                                  size: 20,
+                                ),
+                                onPressed: () {
+                                  //TODO 播放上一首歌曲
+                                },
+                              ),
+                              Consumer<BottomMusicPlayerProvider>(builder: (
+                                context,
+                                bottomMusicPlayerProvider,
+                                child,
+                              ) {
+                                return IconButton(
+                                  icon: CircleAvatar(
+                                    backgroundColor: Colors.red,
+                                    child: Icon(
+                                        size: 24,
+                                        color: Colors.white,
+                                        bottomMusicPlayerProvider.playerState ==
+                                                PlayerState.playing
+                                            ? MyIcon.pause
+                                            : MyIcon.play),
+                                  ),
+                                  onPressed: () {
+                                    if (bottomMusicPlayerProvider.playerState ==
+                                        PlayerState.playing) {
+                                      bottomMusicPlayerProvider
+                                          .setPlayerState(PlayerState.paused);
+                                    } else {
+                                      bottomMusicPlayerProvider
+                                          .setPlayerState(PlayerState.playing);
+                                    }
+                                  },
+                                );
+                              }),
+                              IconButton(
+                                icon: Icon(
+                                  MyIcon.nextSong,
+                                  size: 20,
+                                ),
+                                onPressed: () {
+                                  //TODO 播放下一首歌曲
+                                },
+                              ),
+                              Consumer<BottomMusicPlayerProvider>(builder: (
+                                context,
+                                bottomMusicPlayerProvider,
+                                child,
+                              ) {
+                                return IconButton(
+                                  icon: _setIconWithPlayMode(
+                                    bottomMusicPlayerProvider.playerMode,
+                                  ),
+                                  onPressed: () {
+                                    bottomMusicPlayerProvider.setPlayerMode(
+                                        MyPlayerMode.values[
+                                            (bottomMusicPlayerProvider
+                                                        .playerMode.index +
+                                                    1) %
+                                                MyPlayerMode.values.length]);
+                                  },
+                                );
+                              })
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
+                  );
+                },
+              ),
             ),
             SizedBox(
               width: 300,
@@ -215,5 +297,40 @@ class _BottomMusicPlayerState extends State<BottomMusicPlayer>
         ),
       ),
     );
+  }
+
+  Icon _setIconWithPlayMode(MyPlayerMode mode, {double iconSize = 24.0}) {
+    switch (mode) {
+      case MyPlayerMode.listLoop:
+        return Icon(
+          PlayModeIcon.listLoop,
+          key: ValueKey('listLoop'),
+          size: iconSize,
+        );
+      case MyPlayerMode.singleLoop:
+        return Icon(
+          PlayModeIcon.singleLoop,
+          key: ValueKey('singleLoop'),
+          size: iconSize,
+        );
+      case MyPlayerMode.sequencePlay:
+        return Icon(
+          PlayModeIcon.sequencePlay,
+          key: ValueKey('sequencePlay'),
+          size: iconSize,
+        );
+      case MyPlayerMode.heartPatten:
+        return Icon(
+          PlayModeIcon.heartPatten,
+          key: ValueKey('heartPatten'),
+          size: iconSize,
+        );
+      case MyPlayerMode.randomPlay:
+        return Icon(
+          PlayModeIcon.randomPlay,
+          key: ValueKey('randomPlay'),
+          size: iconSize,
+        );
+    }
   }
 }
