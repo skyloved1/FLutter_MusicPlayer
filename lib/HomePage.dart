@@ -1,9 +1,9 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:netease_cloud_music/Icon/Icon.dart';
-import 'package:netease_cloud_music/subView/MyMusic.dart';
-import 'package:netease_cloud_music/subView/account.dart';
-import 'package:netease_cloud_music/subView/bottomMusicPlayer.dart';
-import 'package:netease_cloud_music/subView/recommend.dart';
+import 'package:netease_cloud_music/subView/account/avatar.dart';
+import 'package:netease_cloud_music/subView/bottom/bottomMusicPlayer.dart';
+import 'package:netease_cloud_music/subView/homePaneItemBody/MyMusic.dart';
+import 'package:netease_cloud_music/subView/homePaneItemBody/recommend.dart';
 import 'package:window_manager/window_manager.dart';
 
 class HomePage extends StatefulWidget {
@@ -47,7 +47,7 @@ class NavigationViewRoute extends StatefulWidget {
     super.key,
   });
 
-  List<NavigationPaneItem> items = <NavigationPaneItem>[
+  final List<NavigationPaneItem> items = <NavigationPaneItem>[
     PaneItem(
       icon: Icon(MyIcon.appIcon),
       title: Text('推荐'),
@@ -89,8 +89,9 @@ class NavigationViewRoute extends StatefulWidget {
     ),
   ];
 
-  var WindowsButtons = WindowsButton();
-  var title = DragToMoveArea(
+  /// **为了避免重复创建，将状态类用到的组件提取到这里**
+  final WindowsButtons = WindowsButton();
+  final title = DragToMoveArea(
     child: Align(
       alignment: Alignment.centerLeft,
       child: Text(
@@ -102,6 +103,16 @@ class NavigationViewRoute extends StatefulWidget {
       ),
     ),
   );
+  final avatar = AvatarWithLoginAndOut();
+  final setting = IconButton(
+      icon: Icon(
+        MyIcon.setting,
+        size: 20,
+        color: Colors.grey[80],
+      ),
+      onPressed: () {
+        //TODO 打开设置窗口
+      });
 
   @override
   State<NavigationViewRoute> createState() => _NavigationViewRouteState();
@@ -133,16 +144,8 @@ class _NavigationViewRouteState extends State<NavigationViewRoute> {
         actions: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Account(),
-            IconButton(
-                icon: Icon(
-                  MyIcon.setting,
-                  size: 20,
-                  color: Colors.grey[80],
-                ),
-                onPressed: () {
-                  //TODO 打开设置窗口
-                }),
+            widget.avatar,
+            widget.setting,
             SizedBox(
               width: 15,
             ),
@@ -200,7 +203,7 @@ class WindowsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
         width: width,
         height: height,
         child: WindowCaption(
