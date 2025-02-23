@@ -23,24 +23,14 @@ class BottomMusicPlayer extends StatefulWidget {
   State<BottomMusicPlayer> createState() => BottomMusicPlayerState();
 }
 
-class BottomMusicPlayerState extends State<BottomMusicPlayer>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _animationController;
-
+class BottomMusicPlayerState extends State<BottomMusicPlayer> {
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: Duration(seconds: 20),
-      lowerBound: 0,
-      upperBound: 2 * 3.1415926,
-    )..repeat();
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
     super.dispose();
   }
 
@@ -53,7 +43,7 @@ class BottomMusicPlayerState extends State<BottomMusicPlayer>
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Left(animationController: _animationController),
+          Left(),
           Mid(audioPlayer: provider.player),
           Right(),
         ],
@@ -208,13 +198,33 @@ class Mid extends StatelessWidget {
   }
 }
 
-class Left extends StatelessWidget {
+class Left extends StatefulWidget {
   const Left({
     super.key,
-    required AnimationController animationController,
-  }) : _animationController = animationController;
+  });
 
-  final AnimationController _animationController;
+  @override
+  State<Left> createState() => _LeftState();
+}
+
+class _LeftState extends State<Left> with SingleTickerProviderStateMixin {
+  late final AnimationController _animationController;
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 20),
+      lowerBound: 0,
+      upperBound: 2 * 3.1415926,
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
