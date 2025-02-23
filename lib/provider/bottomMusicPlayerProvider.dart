@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:smtc_windows/smtc_windows.dart';
 
 import '../globalVariable.dart';
 
@@ -21,7 +20,8 @@ class BottomMusicPlayerProvider with ChangeNotifier {
 
   final SourceType _sourceType = SourceType.url;
   late final AudioPlayer player;
-  late final SMTCWindows smtc;
+
+  BottomMusicPlayerProvider(this.player);
 
   String? get musicAvatar => _musicAvatar;
 
@@ -111,33 +111,8 @@ class BottomMusicPlayerProvider with ChangeNotifier {
     playerModeNotifier.value = value;
   }
 
-  BottomMusicPlayerProvider() {
-    player = AudioPlayer();
-    smtc = SMTCWindows(
-      enabled: true,
-      metadata: MusicMetadata(
-        title: '网易云音乐',
-        artist: '网易云音乐',
-        album: '网易云音乐',
-        albumArtist: '网易云音乐',
-      ),
-      config: const SMTCConfig(
-        fastForwardEnabled: true,
-        nextEnabled: true,
-        pauseEnabled: true,
-        playEnabled: true,
-        rewindEnabled: true,
-        prevEnabled: true,
-        stopEnabled: true,
-      ),
-    );
-  }
-
   @override
   void dispose() {
-    print("player disposed");
-    smtc.dispose();
-    player.dispose();
     playerStateNotifier.dispose();
     playerModeNotifier.dispose();
     super.dispose();

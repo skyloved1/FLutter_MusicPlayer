@@ -1,8 +1,10 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:netease_cloud_music/Icon/Icon.dart';
 import 'package:netease_cloud_music/subView/bottom/bottomProgressIndicator.dart';
 import 'package:provider/provider.dart';
+import 'package:smtc_windows/smtc_windows.dart';
 
 import '../../globalVariable.dart';
 import '../../provider/bottomMusicPlayerProvider.dart';
@@ -23,30 +25,66 @@ class BottomMusicPlayer extends StatefulWidget {
   State<BottomMusicPlayer> createState() => BottomMusicPlayerState();
 }
 
-class BottomMusicPlayerState extends State<BottomMusicPlayer> {
+class BottomMusicPlayerState extends State<BottomMusicPlayer>
+    with WidgetsBindingObserver {
+  late AudioPlayer player;
+  late SMTCWindows smtc;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    player = AudioPlayer();
+    smtc = SMTCWindows(
+      enabled: true,
+      metadata: MusicMetadata(
+        title: '网易云音乐',
+        artist: '网易云音乐',
+        album: '网易云音乐',
+        albumArtist: '网易云音乐',
+      ),
+      config: const SMTCConfig(
+        fastForwardEnabled: true,
+        nextEnabled: true,
+        pauseEnabled: true,
+        playEnabled: true,
+        rewindEnabled: true,
+        prevEnabled: true,
+        stopEnabled: true,
+      ),
+    );
   }
 
   @override
   void dispose() {
+    player.dispose();
+    smtc.dispose();
     super.dispose();
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.detached) {
+      player.dispose();
+      smtc.dispose();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<BottomMusicPlayerProvider>(context);
-    return ColoredBox(
-      color: Color.fromRGBO(45, 45, 56, 1),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Left(),
-          Mid(audioPlayer: provider.player),
-          Right(),
-        ],
+    return ChangeNotifierProvider(
+      create: (_) => BottomMusicPlayerProvider(player),
+      child: ColoredBox(
+        color: Color.fromRGBO(45, 45, 56, 1),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Left(),
+            Mid(audioPlayer: player),
+            Right(),
+          ],
+        ),
       ),
     );
   }
@@ -62,7 +100,16 @@ class Right extends StatelessWidget {
     return SizedBox(
       width: 300,
       height: 75,
-      child: Placeholder(),
+      child: Button(
+          onPressed: () async {
+            var file = await openFile(acceptedTypeGroups: [
+              XTypeGroup(label: 'audio', extensions: ['mp3', 'wav', 'flac'])
+            ]);
+            context
+                .read<BottomMusicPlayerProvider>()
+                .setMusicSource(type: SourceType.file, value: file?.path);
+          },
+          child: Text("Set Source")),
     );
   }
 }
@@ -209,6 +256,7 @@ class Left extends StatefulWidget {
 
 class _LeftState extends State<Left> with SingleTickerProviderStateMixin {
   late final AnimationController _animationController;
+
   @override
   void initState() {
     super.initState();

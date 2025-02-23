@@ -2,8 +2,6 @@ import 'dart:io';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:netease_cloud_music/homePage.dart';
-import 'package:netease_cloud_music/provider/bottomMusicPlayerProvider.dart';
-import 'package:provider/provider.dart';
 import 'package:smtc_windows/smtc_windows.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -32,10 +30,7 @@ void main() async {
     await windowManager.focus();
   });
 
-  runApp(MultiProvider(providers: [
-    //ChangeNotifierProvider(create: (_) => LoginProvider()),
-    ChangeNotifierProvider(create: (_) => BottomMusicPlayerProvider()),
-  ], child: MyApp()));
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
