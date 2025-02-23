@@ -3,7 +3,6 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:netease_cloud_music/Icon/Icon.dart';
 import 'package:netease_cloud_music/subView/bottom/bottomProgressIndicator.dart';
 import 'package:provider/provider.dart';
-import 'package:smtc_windows/smtc_windows.dart';
 
 import '../../globalVariable.dart';
 import '../../provider/bottomMusicPlayerProvider.dart';
@@ -26,18 +25,7 @@ class BottomMusicPlayer extends StatefulWidget {
 
 class BottomMusicPlayerState extends State<BottomMusicPlayer>
     with SingleTickerProviderStateMixin {
-  late final SMTCWindows smtc;
-  late final AudioPlayer player;
   late final AnimationController _animationController;
-  PlayerState playerState = PlayerState.stopped;
-
-  void updateBottomMusicPlayer() {
-    setState(() {});
-  }
-
-  static BottomMusicPlayerState? of(BuildContext context) {
-    return context.findAncestorStateOfType<BottomMusicPlayerState>();
-  }
 
   @override
   void initState() {
@@ -48,39 +36,17 @@ class BottomMusicPlayerState extends State<BottomMusicPlayer>
       lowerBound: 0,
       upperBound: 2 * 3.1415926,
     )..repeat();
-    //..stop(canceled: false);
-    smtc = SMTCWindows(
-      enabled: true,
-      metadata: MusicMetadata(
-        title: '网易云音乐',
-        artist: '网易云音乐',
-        album: '网易云音乐',
-        albumArtist: '网易云音乐',
-      ),
-      config: const SMTCConfig(
-        fastForwardEnabled: true,
-        nextEnabled: true,
-        pauseEnabled: true,
-        playEnabled: true,
-        rewindEnabled: true,
-        prevEnabled: true,
-        stopEnabled: true,
-      ),
-    );
-    player = AudioPlayer(playerId: 'bottomMusicPlayer');
-    player.setSourceAsset("assets/yuanyangxi.mp3");
   }
 
   @override
   void dispose() {
-    smtc.dispose();
-    player.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    print('build bottom music player/n 这个不应该出现，即不应该重建整个底部音乐播放器');
+    final provider = Provider.of<BottomMusicPlayerProvider>(context);
     return ColoredBox(
       color: Color.fromRGBO(45, 45, 56, 1),
       child: Row(
@@ -88,7 +54,7 @@ class BottomMusicPlayerState extends State<BottomMusicPlayer>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Left(animationController: _animationController),
-          Mid(),
+          Mid(audioPlayer: provider.player),
           Right(),
         ],
       ),
@@ -114,7 +80,10 @@ class Right extends StatelessWidget {
 class Mid extends StatelessWidget {
   const Mid({
     super.key,
+    required this.audioPlayer,
   });
+
+  final AudioPlayer audioPlayer;
 
   @override
   Widget build(BuildContext context) {
@@ -152,34 +121,36 @@ class Mid extends StatelessWidget {
                       //TODO 播放上一首歌曲
                     },
                   ),
-                  Consumer<BottomMusicPlayerProvider>(builder: (
-                    context,
-                    bottomMusicPlayerProvider,
-                    child,
-                  ) {
-                    return IconButton(
-                      icon: CircleAvatar(
-                        child: Icon(
-                          size: 24,
-                          color: Colors.white,
-                          bottomMusicPlayerProvider.playerState ==
-                                  PlayerState.playing
-                              ? MyIcon.pause
-                              : MyIcon.play,
+                  ValueListenableBuilder<PlayerState?>(
+                    valueListenable: Provider.of<BottomMusicPlayerProvider>(
+                            context,
+                            listen: false)
+                        .playerStateNotifier,
+                    builder: (context, playerState, child) {
+                      print("Player state have been changed to $playerState");
+                      return IconButton(
+                        icon: CircleAvatar(
+                          child: Icon(
+                            size: 24,
+                            color: Colors.white,
+                            playerState == PlayerState.playing
+                                ? MyIcon.pause
+                                : MyIcon.play,
+                          ),
                         ),
-                      ),
-                      onPressed: () {
-                        if (bottomMusicPlayerProvider.playerState ==
-                            PlayerState.playing) {
-                          bottomMusicPlayerProvider
-                              .setPlayerState(PlayerState.paused);
-                        } else {
-                          bottomMusicPlayerProvider
-                              .setPlayerState(PlayerState.playing);
-                        }
-                      },
-                    );
-                  }),
+                        onPressed: () {
+                          final provider =
+                              Provider.of<BottomMusicPlayerProvider>(context,
+                                  listen: false);
+                          if (playerState == PlayerState.playing) {
+                            provider.setPlayerState(PlayerState.paused);
+                          } else {
+                            provider.setPlayerState(PlayerState.playing);
+                          }
+                        },
+                      );
+                    },
+                  ),
                   IconButton(
                     icon: Icon(
                       MyIcon.nextSong,
@@ -189,9 +160,13 @@ class Mid extends StatelessWidget {
                       //TODO 播放下一首歌曲
                     },
                   ),
-                  Selector<BottomMusicPlayerProvider, MyPlayerMode>(
-                    selector: (context, provider) => provider.playerMode,
+                  ValueListenableBuilder<MyPlayerMode>(
+                    valueListenable: Provider.of<BottomMusicPlayerProvider>(
+                            context,
+                            listen: false)
+                        .playerModeNotifier,
                     builder: (context, playerMode, child) {
+                      print("Play mode have been changed to $playerMode");
                       return IconButton(
                         icon: PlayModeIcon.setIconWithPlayMode(playerMode),
                         onPressed: () {
@@ -199,7 +174,7 @@ class Mid extends StatelessWidget {
                               Provider.of<BottomMusicPlayerProvider>(context,
                                   listen: false);
                           provider.setPlayerMode(MyPlayerMode.values[
-                              (provider.playerMode.index + 1) %
+                              (provider.playerModeNotifier.value.index + 1) %
                                   MyPlayerMode.values.length]);
                         },
                       );
@@ -212,7 +187,9 @@ class Mid extends StatelessWidget {
           Expanded(
             child: SizedBox(
               width: 400,
-              child: BottomProgressIndicator(),
+              child: BottomProgressIndicator(
+                audioPlayer: audioPlayer,
+              ),
             ),
           ),
         ],
@@ -245,54 +222,60 @@ class Left extends StatelessWidget {
                 onPressed: () {
                   //TODO 跳转到全屏播放页面
                 },
-                icon: AnimatedBuilder(
-                  animation: _animationController,
-                  builder: (context, child) {
-                    final playerState = Provider.of<BottomMusicPlayerProvider>(
-                            context,
-                            listen: false)
-                        .playerState;
+                icon: ValueListenableBuilder<PlayerState?>(
+                  valueListenable: Provider.of<BottomMusicPlayerProvider>(
+                          context,
+                          listen: false)
+                      .playerStateNotifier,
+                  builder: (context, playerState, child) {
                     if (playerState == PlayerState.playing) {
                       _animationController.repeat();
                     } else {
                       _animationController.stop();
                     }
-                    return Transform.rotate(
-                      angle: _animationController.value,
-                      child: Stack(
-                        children: [
-                          Center(
-                            child: Container(
-                              width: 75,
-                              height: 75,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Color.fromRGBO(45, 45, 56, 1),
-                              ),
-                              child: Image.asset("assets/img/black.png"),
-                            ),
-                          ),
-                          Center(
-                            child: context
-                                        .watch<BottomMusicPlayerProvider>()
-                                        .musicAvatar !=
-                                    null
-                                ? CircleAvatar(
-                                    backgroundImage: NetworkImage(context
-                                        .watch<BottomMusicPlayerProvider>()
-                                        .musicAvatar!),
-                                  )
-                                : CircleAvatar(
-                                    child: const Icon(FluentIcons.music_note),
+                    return AnimatedBuilder(
+                      animation: _animationController,
+                      builder: (context, child) {
+                        return Transform.rotate(
+                          angle: _animationController.value,
+                          child: Stack(
+                            children: [
+                              Center(
+                                child: Container(
+                                  width: 75,
+                                  height: 75,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Color.fromRGBO(45, 45, 56, 1),
                                   ),
+                                  child: Image.asset("assets/img/black.png"),
+                                ),
+                              ),
+                              Center(
+                                child: context
+                                            .watch<BottomMusicPlayerProvider>()
+                                            .musicAvatar !=
+                                        null
+                                    ? CircleAvatar(
+                                        backgroundImage: NetworkImage(context
+                                            .watch<BottomMusicPlayerProvider>()
+                                            .musicAvatar!),
+                                      )
+                                    : CircleAvatar(
+                                        child:
+                                            const Icon(FluentIcons.music_note),
+                                      ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     );
                   },
                 ),
               ),
             ),
+            //TODO 修改为 Selector OR ValueListenableBuilder
             Consumer<BottomMusicPlayerProvider>(
               builder: (context, provider, child) {
                 print("provider.musicName: ${provider.musicName}");

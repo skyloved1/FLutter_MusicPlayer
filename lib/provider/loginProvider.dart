@@ -51,17 +51,26 @@ class LoginProvider with ChangeNotifier {
   }
 
   Future<String> getAvatar() async {
-    final response = await dio.get(
-      "$apiPrefix/user/account",
-      queryParameters: {
-        'cookie': prefs.getString("cookie"),
-      },
-    );
-    if (response.data["code"] == 200) {
-      prefs.setString("avatarUrl", response.data["profile"]["avatarUrl"]);
-      // notifyListeners();
+    final Response? response;
+    try {
+      response = await dio.get(
+        "$apiPrefix/user/account",
+        queryParameters: {
+          'cookie': prefs.getString("cookie"),
+        },
+      );
+
+      if (response.data["code"] == 200) {
+        prefs.setString("avatarUrl", response.data["profile"]["avatarUrl"]);
+        // notifyListeners();
+      }
+      return response.data["profile"]["avatarUrl"];
+    } catch (e) {
+      //TOOD 处理连接失败
+      print(e);
     }
-    return response.data["profile"]["avatarUrl"];
+
+    return "";
   }
 
   String? get avatarUrl => prefs.getString("avatarUrl");

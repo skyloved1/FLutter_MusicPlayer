@@ -1,6 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:netease_cloud_music/Icon/Icon.dart';
-import 'package:netease_cloud_music/provider/bottomMusicPlayerProvider.dart';
 import 'package:netease_cloud_music/subView/account/avatar.dart';
 import 'package:netease_cloud_music/subView/bottom/bottomMusicPlayer.dart';
 import 'package:netease_cloud_music/subView/homePaneItemBody/MyMusic.dart';
@@ -35,7 +34,7 @@ class _HomePageState extends State<HomePage> {
           alignment: Alignment.bottomCenter,
           child: SizedBox(
             height: 76,
-            child: BottomMusicPlayerProviderParent(child: BottomMusicPlayer()),
+            child: BottomMusicPlayer(),
           ),
         )
       ],
@@ -145,7 +144,7 @@ class _NavigationViewRouteState extends State<NavigationViewRoute> {
         actions: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            widget.avatar,
+            //widget.avatar,
             widget.setting,
             SizedBox(
               width: 15,

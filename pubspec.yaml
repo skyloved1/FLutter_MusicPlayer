@@ -69,6 +69,7 @@ flutter:
      - assets/img/neteaseIcon.png
      - assets/img/black.png
      - assets/img/appicon.ico
+     - assets/yuanyangxi.mp3
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
