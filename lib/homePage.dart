@@ -15,16 +15,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
@@ -95,7 +85,7 @@ class NavigationViewRoute extends StatefulWidget {
     child: Align(
       alignment: Alignment.centerLeft,
       child: Text(
-        '网易云音乐',
+        '音乐播放器',
         textScaler: TextScaler.linear(2.0),
         style: TextStyle(
           fontFamily: "楷体",

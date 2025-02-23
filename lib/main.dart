@@ -24,7 +24,7 @@ void main() async {
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
     titleBarStyle: TitleBarStyle.hidden,
-    title: "网易云音乐",
+    title: "音乐播放器",
   );
   windowManager.waitUntilReadyToShow(windowOptions, () async {
     await windowManager.setIcon("assets/img/appicon.ico");
