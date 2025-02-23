@@ -26,14 +26,13 @@ class BottomMusicPlayer extends StatefulWidget {
 }
 
 class BottomMusicPlayerState extends State<BottomMusicPlayer>
-    with WidgetsBindingObserver {
+    with AutomaticKeepAliveClientMixin {
   late AudioPlayer player;
   late SMTCWindows smtc;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     player = AudioPlayer();
     smtc = SMTCWindows(
       enabled: true,
@@ -63,15 +62,8 @@ class BottomMusicPlayerState extends State<BottomMusicPlayer>
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.detached) {
-      player.dispose();
-      smtc.dispose();
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    super.build(context);
     return ChangeNotifierProvider(
       create: (_) => BottomMusicPlayerProvider(player),
       child: ColoredBox(
@@ -88,6 +80,9 @@ class BottomMusicPlayerState extends State<BottomMusicPlayer>
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 class Right extends StatelessWidget {
@@ -100,16 +95,20 @@ class Right extends StatelessWidget {
     return SizedBox(
       width: 300,
       height: 75,
-      child: Button(
-          onPressed: () async {
-            var file = await openFile(acceptedTypeGroups: [
-              XTypeGroup(label: 'audio', extensions: ['mp3', 'wav', 'flac'])
-            ]);
-            context
-                .read<BottomMusicPlayerProvider>()
-                .setMusicSource(type: SourceType.file, value: file?.path);
-          },
-          child: Text("Set Source")),
+      child: Column(
+        children: [
+          Button(
+              onPressed: () async {
+                var file = await openFile(acceptedTypeGroups: [
+                  XTypeGroup(label: 'audio', extensions: ['mp3', 'wav', 'flac'])
+                ]);
+                context
+                    .read<BottomMusicPlayerProvider>()
+                    .setMusicSource(type: SourceType.file, value: file?.path);
+              },
+              child: Text("Set Source")),
+        ],
+      ),
     );
   }
 }
