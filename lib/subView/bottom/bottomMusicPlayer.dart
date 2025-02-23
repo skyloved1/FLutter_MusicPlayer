@@ -1,8 +1,8 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:netease_cloud_music/Icon/Icon.dart';
+import 'package:netease_cloud_music/subView/bottom/bottomProgressIndicator.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smtc_windows/smtc_windows.dart';
 
 import '../../globalVariable.dart';
@@ -20,28 +20,23 @@ class BottomMusicPlayer extends StatefulWidget {
 
   const BottomMusicPlayer._({super.key});
 
-  static _BottomMusicPlayerState? of(BuildContext context) {
-    return context.findAncestorStateOfType<_BottomMusicPlayerState>();
-  }
-
   @override
-  State<BottomMusicPlayer> createState() => _BottomMusicPlayerState();
+  State<BottomMusicPlayer> createState() => BottomMusicPlayerState();
 }
 
-class _BottomMusicPlayerState extends State<BottomMusicPlayer>
+class BottomMusicPlayerState extends State<BottomMusicPlayer>
     with SingleTickerProviderStateMixin {
   late final SMTCWindows smtc;
   late final AudioPlayer player;
   late final AnimationController _animationController;
   PlayerState playerState = PlayerState.stopped;
-  late SharedPreferences prefs;
-
-  initSharedPreferences() async {
-    prefs = await SharedPreferences.getInstance();
-  }
 
   void updateBottomMusicPlayer() {
     setState(() {});
+  }
+
+  static BottomMusicPlayerState? of(BuildContext context) {
+    return context.findAncestorStateOfType<BottomMusicPlayerState>();
   }
 
   @override
@@ -72,7 +67,8 @@ class _BottomMusicPlayerState extends State<BottomMusicPlayer>
         stopEnabled: true,
       ),
     );
-    player = AudioPlayer();
+    player = AudioPlayer(playerId: 'bottomMusicPlayer');
+    player.setSourceAsset("assets/yuanyangxi.mp3");
   }
 
   @override
@@ -212,7 +208,13 @@ class Mid extends StatelessWidget {
                 ],
               ),
             ),
-          )
+          ),
+          Expanded(
+            child: SizedBox(
+              width: 400,
+              child: BottomProgressIndicator(),
+            ),
+          ),
         ],
       ),
     );

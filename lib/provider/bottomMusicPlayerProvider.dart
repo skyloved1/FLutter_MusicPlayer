@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../globalVariable.dart';
 
 class BottomMusicPlayerProvider with ChangeNotifier {
+  final AudioPlayer _audioPlayer = AudioPlayer(playerId: "bottomMusicPlayer");
   String? _musicAvatar;
   String? _musicName;
   String? _musicArtist;
