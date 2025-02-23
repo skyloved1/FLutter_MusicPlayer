@@ -18,8 +18,8 @@ class BottomMusicPlayerProvider with ChangeNotifier {
   ValueNotifier<PlayerState?> playerStateNotifier = ValueNotifier(null);
   ValueNotifier<MyPlayerMode> playerModeNotifier =
       ValueNotifier(MyPlayerMode.sequencePlay);
-  ValueNotifier<String?> _musicSourceNotifier = ValueNotifier(null);
-  SourceType _sourceType = SourceType.url;
+
+  final SourceType _sourceType = SourceType.url;
   late final AudioPlayer player;
   late final SMTCWindows smtc;
 
@@ -39,7 +39,6 @@ class BottomMusicPlayerProvider with ChangeNotifier {
 
   get playerState => playerStateNotifier.value;
 
-  ValueNotifier<String?> get musicSourceNotifier => _musicSourceNotifier;
   void setMusicAvatar(String value) {
     _musicAvatar = value;
     notifyListeners();
@@ -53,9 +52,6 @@ class BottomMusicPlayerProvider with ChangeNotifier {
 
   void setMusicSource(
       {String? value, Uint8List? bytes, type = SourceType.url}) async {
-    if (SourceType.bytes != type) {
-      _musicSourceNotifier.value = value;
-    }
     print("Setting music source: $value");
     try {
       switch (type) {
@@ -139,6 +135,7 @@ class BottomMusicPlayerProvider with ChangeNotifier {
 
   @override
   void dispose() {
+    print("player disposed");
     smtc.dispose();
     player.dispose();
     playerStateNotifier.dispose();
@@ -146,25 +143,3 @@ class BottomMusicPlayerProvider with ChangeNotifier {
     super.dispose();
   }
 }
-
-/*// In the parent widget of BottomMusicPlayer
-class BottomMusicPlayerProviderParent extends StatefulWidget {
-  final Widget child;
-
-  const BottomMusicPlayerProviderParent({super.key, required this.child});
-
-  @override
-  State<BottomMusicPlayerProviderParent> createState() =>
-      _BottomMusicPlayerProviderParentState();
-}
-
-class _BottomMusicPlayerProviderParentState
-    extends State<BottomMusicPlayerProviderParent> {
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => BottomMusicPlayerProvider(),
-      child: widget.child,
-    );
-  }
-}*/
