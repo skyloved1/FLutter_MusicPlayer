@@ -1,5 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 
+import '../globalVariable.dart';
+
 class MyIcon {
   static const IconData appIcon = IconData(0xe60b, fontFamily: "musicIcon");
   static const IconData appIcon2 = IconData(0xe60c, fontFamily: "musicIcon");
@@ -23,4 +25,39 @@ class PlayModeIcon {
   static const IconData sequencePlay =
       IconData(0xe60a, fontFamily: "musicIcon");
   static const IconData heartPatten = IconData(0xe61a, fontFamily: "musicIcon");
+
+  static Icon setIconWithPlayMode(MyPlayerMode mode, {double iconSize = 24.0}) {
+    switch (mode) {
+      case MyPlayerMode.listLoop:
+        return Icon(
+          PlayModeIcon.listLoop,
+          key: ValueKey('listLoop'),
+          size: iconSize,
+        );
+      case MyPlayerMode.singleLoop:
+        return Icon(
+          PlayModeIcon.singleLoop,
+          key: ValueKey('singleLoop'),
+          size: iconSize,
+        );
+      case MyPlayerMode.sequencePlay:
+        return Icon(
+          PlayModeIcon.sequencePlay,
+          key: ValueKey('sequencePlay'),
+          size: iconSize,
+        );
+      case MyPlayerMode.heartPatten:
+        return Icon(
+          PlayModeIcon.heartPatten,
+          key: ValueKey('heartPatten'),
+          size: iconSize,
+        );
+      case MyPlayerMode.randomPlay:
+        return Icon(
+          PlayModeIcon.randomPlay,
+          key: ValueKey('randomPlay'),
+          size: iconSize,
+        );
+    }
+  }
 }

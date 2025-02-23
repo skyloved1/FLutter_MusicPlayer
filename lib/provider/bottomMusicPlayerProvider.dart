@@ -1,13 +1,8 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:provider/provider.dart';
 
-enum MyPlayerMode {
-  listLoop,
-  singleLoop,
-  sequencePlay,
-  heartPatten,
-  randomPlay,
-}
+import '../globalVariable.dart';
 
 class BottomMusicPlayerProvider with ChangeNotifier {
   String? _musicAvatar;
@@ -57,5 +52,27 @@ class BottomMusicPlayerProvider with ChangeNotifier {
   void setPlayerMode(MyPlayerMode value) {
     _playerMode = value;
     notifyListeners();
+  }
+}
+
+// In the parent widget of BottomMusicPlayer
+class BottomMusicPlayerProviderParent extends StatefulWidget {
+  final Widget child;
+
+  const BottomMusicPlayerProviderParent({super.key, required this.child});
+
+  @override
+  State<BottomMusicPlayerProviderParent> createState() =>
+      _BottomMusicPlayerProviderParentState();
+}
+
+class _BottomMusicPlayerProviderParentState
+    extends State<BottomMusicPlayerProviderParent> {
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => BottomMusicPlayerProvider(),
+      child: widget.child,
+    );
   }
 }
