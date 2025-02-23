@@ -45,10 +45,10 @@ class BottomMusicPlayerProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setSongDuration(Duration value) async {
-    //在每次设置文件时，都会重新获取时长
-    //所以这里不需要通知监听器
-    _songDuration = value;
+  ValueNotifier<Duration?> songDurationNotifier = ValueNotifier(Duration.zero);
+
+  void setSongDuration(Duration value) {
+    songDurationNotifier.value = value;
   }
 
   void setMusicSource(
@@ -82,6 +82,8 @@ class BottomMusicPlayerProvider with ChangeNotifier {
       }
       var duration = await player.getDuration();
       setSongDuration(duration ?? Duration.zero);
+      player.resume();
+      setPlayerState(PlayerState.playing);
     } catch (e) {
       print("Error setting music source: $e");
       // Handle the error, e.g., show a message to the user
