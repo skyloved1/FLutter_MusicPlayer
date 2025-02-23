@@ -95,7 +95,7 @@ class NavigationViewRoute extends StatefulWidget {
     child: Align(
       alignment: Alignment.centerLeft,
       child: Text(
-        '网易云音乐',
+        '音乐播放器',
         textScaler: TextScaler.linear(2.0),
         style: TextStyle(
           fontFamily: "楷体",
