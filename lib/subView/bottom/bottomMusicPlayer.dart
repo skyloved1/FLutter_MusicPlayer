@@ -130,12 +130,22 @@ class Mid extends StatelessWidget {
                       print("Player state have been changed to $playerState");
                       return IconButton(
                         icon: CircleAvatar(
-                          child: Icon(
-                            size: 24,
-                            color: Colors.white,
-                            playerState == PlayerState.playing
-                                ? MyIcon.pause
-                                : MyIcon.play,
+                          child: AnimatedSwitcher(
+                            duration: Duration(milliseconds: 200),
+                            transitionBuilder: (child, animation) {
+                              return ScaleTransition(
+                                scale: animation,
+                                child: child,
+                              );
+                            },
+                            child: Icon(
+                              key: ValueKey(playerState),
+                              size: 24,
+                              color: Colors.white,
+                              playerState == PlayerState.playing
+                                  ? MyIcon.pause
+                                  : MyIcon.play,
+                            ),
                           ),
                         ),
                         onPressed: () {

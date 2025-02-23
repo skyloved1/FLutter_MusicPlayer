@@ -7,7 +7,7 @@ import 'package:netease_cloud_music/subView/homePaneItemBody/recommend.dart';
 import 'package:window_manager/window_manager.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({super.key});
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -36,7 +36,7 @@ class _HomePageState extends State<HomePage> {
             height: 76,
             child: BottomMusicPlayer(),
           ),
-        )
+        ),
       ],
     );
   }
@@ -90,7 +90,7 @@ class NavigationViewRoute extends StatefulWidget {
   ];
 
   /// **为了避免重复创建，将状态类用到的组件提取到这里**
-  final WindowsButtons = WindowsButton();
+  final windowsButtons = WindowsButton();
   final title = DragToMoveArea(
     child: Align(
       alignment: Alignment.centerLeft,
@@ -163,7 +163,7 @@ class _NavigationViewRouteState extends State<NavigationViewRoute> {
             SizedBox(
               width: 15,
             ),
-            widget.WindowsButtons,
+            widget.windowsButtons,
           ],
         ),
       ),
