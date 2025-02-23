@@ -34,6 +34,7 @@ class BottomMusicPlayerState extends State<BottomMusicPlayer>
   void initState() {
     super.initState();
     player = AudioPlayer();
+    player.setReleaseMode(ReleaseMode.loop);
     smtc = SMTCWindows(
       enabled: true,
       metadata: MusicMetadata(
