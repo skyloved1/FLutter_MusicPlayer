@@ -116,6 +116,11 @@ class _NavigationViewRouteState extends State<NavigationViewRoute> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   _openSettingWindow() {
     //TODO 设置跳转  方法
   }

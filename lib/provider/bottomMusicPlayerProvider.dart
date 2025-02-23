@@ -112,7 +112,7 @@ class BottomMusicPlayerProvider with ChangeNotifier {
   }
 
   BottomMusicPlayerProvider() {
-    player = AudioPlayer(playerId: 'bottomMusicPlayer');
+    player = AudioPlayer();
     smtc = SMTCWindows(
       enabled: true,
       metadata: MusicMetadata(
