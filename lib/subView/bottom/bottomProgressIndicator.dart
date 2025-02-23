@@ -19,13 +19,12 @@ class BottomProgressIndicator extends StatefulWidget {
 
 class _BottomProgressIndicatorState extends State<BottomProgressIndicator> {
   Duration currentPos = Duration(seconds: 0);
-  Duration totalPos = Duration(seconds: 0);
-  late final StreamSubscription<Duration> subscrib;
+  late final StreamSubscription<Duration> positionSubscription;
 
   @override
   void initState() {
     super.initState();
-    subscrib = widget.audioPlayer.onPositionChanged.listen((event) {
+    positionSubscription = widget.audioPlayer.onPositionChanged.listen((event) {
       print("Position changed: $event");
       setState(() {
         currentPos = event;
@@ -35,7 +34,7 @@ class _BottomProgressIndicatorState extends State<BottomProgressIndicator> {
 
   @override
   void dispose() {
-    subscrib.cancel();
+    positionSubscription.cancel();
     super.dispose();
   }
 
@@ -50,32 +49,29 @@ class _BottomProgressIndicatorState extends State<BottomProgressIndicator> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         Text(_formatDuration(currentPos)),
-        Spacer(
-          flex: 1,
-        ),
+        Spacer(flex: 1),
         Expanded(
           flex: 10,
-          child: Slider(
-            min: 0,
-            max: context
-                .read<BottomMusicPlayerProvider>()
-                .songDuration
-                .inSeconds
-                .toDouble(),
-            value: currentPos.inSeconds
-                .toDouble()
-                .clamp(0, totalPos.inSeconds.toDouble()),
-            divisions: totalPos.inSeconds > 0 ? totalPos.inSeconds : 1,
-            onChanged: (value) {
-              widget.audioPlayer.seek(
-                Duration(seconds: value.toInt()),
+          child: ValueListenableBuilder<Duration?>(
+            valueListenable: Provider.of<BottomMusicPlayerProvider>(context)
+                .songDurationNotifier,
+            builder: (context, totalPos, child) {
+              return Slider(
+                min: 0,
+                max: totalPos?.inSeconds.toDouble() ?? 0,
+                value: currentPos.inSeconds
+                    .toDouble()
+                    .clamp(0, totalPos?.inSeconds.toDouble() ?? 0),
+                divisions:
+                    (totalPos?.inSeconds ?? 1) > 0 ? totalPos?.inSeconds : null,
+                onChanged: (value) {
+                  widget.audioPlayer.seek(Duration(seconds: value.toInt()));
+                },
               );
             },
           ),
         ),
-        Spacer(
-          flex: 1,
-        ),
+        Spacer(flex: 1),
         widget.songDuration,
       ],
     );
@@ -89,32 +85,19 @@ class DisPlaySongDuration extends StatefulWidget {
   State<DisPlaySongDuration> createState() => _DisPlaySongDurationState();
 }
 
-String _formatDuration(Duration duration) {
-  return "${duration.inMinutes.remainder(60).toString().padLeft(2, '0')}:${duration.inSeconds.remainder(60).toString().padLeft(2, '0')}";
-}
-
 class _DisPlaySongDurationState extends State<DisPlaySongDuration> {
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<String?>(
+    return ValueListenableBuilder<Duration?>(
       valueListenable:
-          Provider.of<BottomMusicPlayerProvider>(context).musicSourceNotifier,
-      builder: (BuildContext context, duration, Widget? child) {
-        return FutureBuilder(
-          future: Provider.of<BottomMusicPlayerProvider>(context, listen: false)
-              .player
-              .getDuration(),
-          builder: (BuildContext context, AsyncSnapshot<Duration?> snapshot) {
-            if (snapshot.hasError) {
-              return Text(snapshot.error.toString());
-            }
-            if (snapshot.hasData) {
-              return Text(_formatDuration(snapshot.data!));
-            }
-            return ProgressRing();
-          },
-        );
+          Provider.of<BottomMusicPlayerProvider>(context).songDurationNotifier,
+      builder: (BuildContext context, Duration? duration, Widget? child) {
+        return Text(_formatDuration(duration ?? Duration.zero));
       },
     );
   }
+}
+
+String _formatDuration(Duration duration) {
+  return "${duration.inMinutes.remainder(60).toString().padLeft(2, '0')}:${duration.inSeconds.remainder(60).toString().padLeft(2, '0')}";
 }
