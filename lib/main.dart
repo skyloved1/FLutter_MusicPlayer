@@ -1,9 +1,14 @@
 import 'dart:io';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:netease_cloud_music/homePage.dart';
+import 'package:netease_cloud_music/provider/bottomMusicPlayerProvider.dart';
+import 'package:provider/provider.dart';
 import 'package:smtc_windows/smtc_windows.dart';
 import 'package:window_manager/window_manager.dart';
+
+import 'globalVariable.dart';
 
 void main() async {
   if (!Platform.isWindows) {
@@ -41,36 +46,73 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  late AudioPlayer player;
+  late SMTCWindows smtc;
+  late ValueNotifier<List<MusicInfo>> musicListNotifier;
+
+  @override
+  void initState() {
+    musicListNotifier = ValueNotifier([]);
+    player = AudioPlayer();
+    player.setReleaseMode(ReleaseMode.loop);
+    smtc = SMTCWindows(
+      enabled: true,
+      metadata: MusicMetadata(
+        title: '网易云音乐',
+        artist: '网易云音乐',
+        album: '网易云音乐',
+        albumArtist: '网易云音乐',
+      ),
+      config: const SMTCConfig(
+        fastForwardEnabled: true,
+        nextEnabled: true,
+        pauseEnabled: true,
+        playEnabled: true,
+        rewindEnabled: true,
+        prevEnabled: true,
+        stopEnabled: true,
+      ),
+    );
+    super.initState();
+  }
+
   @override
   void dispose() {
+    player.dispose();
+    smtc.dispose();
+    musicListNotifier.dispose();
     windowManager.destroy();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FluentApp(
-      locale: const Locale("zh", "CN"),
-      theme: FluentThemeData(
-          acrylicBackgroundColor: Color(0x13131a),
+    return ChangeNotifierProvider(
+      create: (_) => BottomMusicPlayerProvider(
+          player: player, musicListNotifier: musicListNotifier),
+      child: FluentApp(
+        locale: const Locale("zh", "CN"),
+        theme: FluentThemeData(
+            acrylicBackgroundColor: Color(0x13131a),
+            fontFamily: "等线",
+            accentColor: Colors.red,
+            navigationPaneTheme: NavigationPaneThemeData(
+              backgroundColor: Colors.white,
+              selectedIconColor: WidgetStateProperty.all(Colors.red),
+            )),
+        darkTheme: FluentThemeData(
           fontFamily: "等线",
           accentColor: Colors.red,
+          brightness: Brightness.dark,
           navigationPaneTheme: NavigationPaneThemeData(
-            backgroundColor: Colors.white,
+            backgroundColor: Color.fromRGBO(19, 19, 26, 1),
             selectedIconColor: WidgetStateProperty.all(Colors.red),
-          )),
-      darkTheme: FluentThemeData(
-        fontFamily: "等线",
-        accentColor: Colors.red,
-        brightness: Brightness.dark,
-        navigationPaneTheme: NavigationPaneThemeData(
-          backgroundColor: Color.fromRGBO(19, 19, 26, 1),
-          selectedIconColor: WidgetStateProperty.all(Colors.red),
-          unselectedIconColor: WidgetStateProperty.all(Colors.white),
+            unselectedIconColor: WidgetStateProperty.all(Colors.white),
+          ),
         ),
+        themeMode: ThemeMode.dark,
+        home: HomePage(),
       ),
-      themeMode: ThemeMode.dark,
-      home: HomePage(),
     );
   }
 }

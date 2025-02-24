@@ -4,7 +4,6 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:netease_cloud_music/Icon/Icon.dart';
 import 'package:netease_cloud_music/subView/bottom/bottomProgressIndicator.dart';
 import 'package:provider/provider.dart';
-import 'package:smtc_windows/smtc_windows.dart';
 
 import '../../globalVariable.dart';
 import '../../provider/bottomMusicPlayerProvider.dart';
@@ -27,57 +26,24 @@ class BottomMusicPlayer extends StatefulWidget {
 
 class BottomMusicPlayerState extends State<BottomMusicPlayer>
     with AutomaticKeepAliveClientMixin {
-  late AudioPlayer player;
-  late SMTCWindows smtc;
-
-  @override
-  void initState() {
-    super.initState();
-    player = AudioPlayer();
-    player.setReleaseMode(ReleaseMode.loop);
-    smtc = SMTCWindows(
-      enabled: true,
-      metadata: MusicMetadata(
-        title: '网易云音乐',
-        artist: '网易云音乐',
-        album: '网易云音乐',
-        albumArtist: '网易云音乐',
-      ),
-      config: const SMTCConfig(
-        fastForwardEnabled: true,
-        nextEnabled: true,
-        pauseEnabled: true,
-        playEnabled: true,
-        rewindEnabled: true,
-        prevEnabled: true,
-        stopEnabled: true,
-      ),
-    );
-  }
-
   @override
   void dispose() {
-    player.dispose();
-    smtc.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return ChangeNotifierProvider(
-      create: (_) => BottomMusicPlayerProvider(player),
-      child: ColoredBox(
-        color: Color.fromRGBO(45, 45, 56, 1),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Left(),
-            Mid(audioPlayer: player),
-            Right(),
-          ],
-        ),
+    return ColoredBox(
+      color: Color.fromRGBO(45, 45, 56, 1),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Left(),
+          Mid(audioPlayer: context.read<BottomMusicPlayerProvider>().player),
+          Right(),
+        ],
       ),
     );
   }
@@ -103,9 +69,11 @@ class Right extends StatelessWidget {
                 var file = await openFile(acceptedTypeGroups: [
                   XTypeGroup(label: 'audio', extensions: ['mp3', 'wav', 'flac'])
                 ]);
-                context
-                    .read<BottomMusicPlayerProvider>()
-                    .setMusicSource(type: SourceType.file, value: file?.path);
+                if (file != null) {
+                  context.read<BottomMusicPlayerProvider>().addMusic(MusicInfo(
+                      source: DeviceFileSource(file.path),
+                      sourceType: SourceType.file));
+                }
               },
               child: Text("Set Source")),
         ],
@@ -204,7 +172,7 @@ class Mid extends StatelessWidget {
                       size: 20,
                     ),
                     onPressed: () {
-                      //TODO 播放下一首歌曲
+                      context.read<BottomMusicPlayerProvider>().playNext();
                     },
                   ),
                   ValueListenableBuilder<MyPlayerMode>(
@@ -274,6 +242,20 @@ class _LeftState extends State<Left> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
+  CircleAvatar tryToSetMusicAvatar(BottomMusicPlayerProvider provider) {
+    final musicList = provider.musicListNotifier.value;
+    if (musicList.isNotEmpty) {
+      return CircleAvatar(
+        backgroundImage:
+            NetworkImage(musicList[provider.currentMusicIndex].musicAvatar!),
+      );
+    } else {
+      return CircleAvatar(
+        child: const Icon(FluentIcons.music_note),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Transform.translate(
@@ -321,18 +303,39 @@ class _LeftState extends State<Left> with SingleTickerProviderStateMixin {
                               ),
                               Center(
                                 child: context
-                                            .watch<BottomMusicPlayerProvider>()
-                                            .musicAvatar !=
-                                        null
+                                        .watch<BottomMusicPlayerProvider>()
+                                        .musicListNotifier
+                                        .value
+                                        .isEmpty
                                     ? CircleAvatar(
-                                        backgroundImage: NetworkImage(context
-                                            .watch<BottomMusicPlayerProvider>()
-                                            .musicAvatar!),
-                                      )
-                                    : CircleAvatar(
                                         child:
                                             const Icon(FluentIcons.music_note),
-                                      ),
+                                      )
+                                    : context
+                                                .watch<
+                                                    BottomMusicPlayerProvider>()
+                                                .musicListNotifier
+                                                .value[context
+                                                    .watch<
+                                                        BottomMusicPlayerProvider>()
+                                                    .currentMusicIndex]
+                                                .musicAvatar ==
+                                            null
+                                        ? CircleAvatar(
+                                            child: const Icon(
+                                                FluentIcons.music_note),
+                                          )
+                                        : CircleAvatar(
+                                            backgroundImage: NetworkImage(context
+                                                .watch<
+                                                    BottomMusicPlayerProvider>()
+                                                .musicListNotifier
+                                                .value[context
+                                                    .watch<
+                                                        BottomMusicPlayerProvider>()
+                                                    .currentMusicIndex]
+                                                .musicAvatar!),
+                                          ),
                               ),
                             ],
                           ),
@@ -346,7 +349,7 @@ class _LeftState extends State<Left> with SingleTickerProviderStateMixin {
             //TODO 修改为 Selector OR ValueListenableBuilder
             Consumer<BottomMusicPlayerProvider>(
               builder: (context, provider, child) {
-                print("provider.musicName: ${provider.musicName}");
+                print("provider.musicName: ${provider.musicListNotifier}");
                 return Positioned(
                   left: 85,
                   child: SizedBox(
@@ -357,11 +360,23 @@ class _LeftState extends State<Left> with SingleTickerProviderStateMixin {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          provider.musicName ?? '歌曲名',
+                          provider.musicListNotifier.value.isNotEmpty
+                              ? provider
+                                      .musicListNotifier
+                                      .value[provider.currentMusicIndex]
+                                      .musicName ??
+                                  '未知歌曲名'
+                              : "",
                           style: FluentTheme.of(context).typography.subtitle,
                         ),
                         Text(
-                          provider.musicArtist ?? '歌手名',
+                          provider.musicListNotifier.value.isNotEmpty
+                              ? provider
+                                      .musicListNotifier
+                                      .value[provider.currentMusicIndex]
+                                      .musicArtist ??
+                                  '未知歌曲名'
+                              : "",
                           style: FluentTheme.of(context).typography.caption,
                         ),
                       ],
