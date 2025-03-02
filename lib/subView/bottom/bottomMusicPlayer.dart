@@ -62,20 +62,37 @@ class Right extends StatelessWidget {
     return SizedBox(
       width: 300,
       height: 75,
-      child: Column(
+      child: Row(
         children: [
-          Button(
+          Tooltip(
+            message: "添加音乐到播放列表",
+            useMousePosition: true,
+            triggerMode: TooltipTriggerMode.manual,
+            //TODO 尝试添加动画效果
+            child: IconButton(
+              key: ValueKey('add_music_button'),
               onPressed: () async {
                 var file = await openFile(acceptedTypeGroups: [
-                  XTypeGroup(label: 'audio', extensions: ['mp3', 'wav', 'flac'])
+                  XTypeGroup(
+                      label: 'audio',
+                      extensions: ['mp3', 'wav', 'flac', 'm4a', 'aac'])
                 ]);
                 if (file != null) {
-                  context.read<BottomMusicPlayerProvider>().addMusic(MusicInfo(
-                      source: DeviceFileSource(file.path),
-                      sourceType: SourceType.file));
+                  String name = file.name.split('\\').last;
+                  print("name:$name");
+                  Provider.of<BottomMusicPlayerProvider>(context, listen: false)
+                      .addMusic(MusicInfo(
+                          musicName: name,
+                          source: DeviceFileSource(file.path),
+                          sourceType: SourceType.file));
                 }
               },
-              child: Text("Set Source")),
+              icon: Icon(
+                MyIcon.add,
+                size: 24,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -247,7 +264,7 @@ class _LeftState extends State<Left> with SingleTickerProviderStateMixin {
     if (musicList.isNotEmpty) {
       return CircleAvatar(
         backgroundImage:
-            NetworkImage(musicList[provider.currentMusicIndex].musicAvatar!),
+            NetworkImage(musicList[provider.getCurrentMusicIndex].musicAvatar!),
       );
     } else {
       return CircleAvatar(
@@ -318,7 +335,7 @@ class _LeftState extends State<Left> with SingleTickerProviderStateMixin {
                                                 .value[context
                                                     .watch<
                                                         BottomMusicPlayerProvider>()
-                                                    .currentMusicIndex]
+                                                    .getCurrentMusicIndex]
                                                 .musicAvatar ==
                                             null
                                         ? CircleAvatar(
@@ -333,7 +350,7 @@ class _LeftState extends State<Left> with SingleTickerProviderStateMixin {
                                                 .value[context
                                                     .watch<
                                                         BottomMusicPlayerProvider>()
-                                                    .currentMusicIndex]
+                                                    .getCurrentMusicIndex]
                                                 .musicAvatar!),
                                           ),
                               ),
@@ -347,44 +364,48 @@ class _LeftState extends State<Left> with SingleTickerProviderStateMixin {
               ),
             ),
             //TODO 修改为 Selector OR ValueListenableBuilder
-            Consumer<BottomMusicPlayerProvider>(
-              builder: (context, provider, child) {
-                print("provider.musicName: ${provider.musicListNotifier}");
-                return Positioned(
-                  left: 85,
-                  child: SizedBox(
-                    width: 225,
-                    height: 75,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          provider.musicListNotifier.value.isNotEmpty
-                              ? provider
-                                      .musicListNotifier
-                                      .value[provider.currentMusicIndex]
-                                      .musicName ??
-                                  '未知歌曲名'
-                              : "",
-                          style: FluentTheme.of(context).typography.subtitle,
-                        ),
-                        Text(
-                          provider.musicListNotifier.value.isNotEmpty
-                              ? provider
-                                      .musicListNotifier
-                                      .value[provider.currentMusicIndex]
-                                      .musicArtist ??
-                                  '未知歌曲名'
-                              : "",
-                          style: FluentTheme.of(context).typography.caption,
-                        ),
-                      ],
+            ValueListenableBuilder(
+                valueListenable: Provider.of<BottomMusicPlayerProvider>(context,
+                        listen: true)
+                    .currentMusicIndexNotifier,
+                builder: (context, value, child) {
+                  final provider = Provider.of<BottomMusicPlayerProvider>(
+                      context,
+                      listen: false);
+                  return Positioned(
+                    left: 85,
+                    child: SizedBox(
+                      width: 225,
+                      height: 75,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            provider.musicListNotifier.value.isNotEmpty
+                                ? provider
+                                        .musicListNotifier
+                                        .value[provider.getCurrentMusicIndex]
+                                        .musicName ??
+                                    '未知歌曲名'
+                                : "未知歌曲名",
+                            style: FluentTheme.of(context).typography.subtitle,
+                          ),
+                          Text(
+                            provider.musicListNotifier.value.isNotEmpty
+                                ? provider
+                                        .musicListNotifier
+                                        .value[provider.getCurrentMusicIndex]
+                                        .musicArtist ??
+                                    '未知歌曲名'
+                                : "未知歌曲名",
+                            style: FluentTheme.of(context).typography.caption,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
-            ),
+                  );
+                }),
           ],
         ),
       ),

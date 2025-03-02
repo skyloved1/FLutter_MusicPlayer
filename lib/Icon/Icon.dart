@@ -16,6 +16,8 @@ class MyIcon {
   static const IconData nextSong = IconData(0xe609, fontFamily: "musicIcon");
   static const IconData play = IconData(0xe60f, fontFamily: "musicIcon");
   static const IconData pause = IconData(0xe610, fontFamily: "musicIcon");
+  static const IconData add = IconData(0xe642, fontFamily: "musicIcon");
+  static const IconData playList = IconData(0xea82, fontFamily: "musicIcon");
 }
 
 class PlayModeIcon {

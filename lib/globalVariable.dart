@@ -29,7 +29,7 @@ class MusicInfo {
       this.musicArtist,
       this.musicAvatar,
       this.musicAlbum}) {
-    musicName = caculateMusicName(source_: source, sourceType_: sourceType);
+    musicName ??= caculateMusicName(source_: source, sourceType_: sourceType);
     // if (musicAvatar == null) {
     //   tryToSetMusicAvatarWithDeviceFileSource(musicInfo: this);
     // }
@@ -41,14 +41,18 @@ class MusicInfo {
     switch (sourceType_) {
       case SourceType.url:
         musicName ??=
-            (source_ as UrlSource).url.split("/").last.split(".").first;
+            (source_ as UrlSource).url.split("\\").last.split(".").first;
         break;
       case SourceType.asset:
         musicName =
-            (source_ as AssetSource).path.split("/").last.split(".").first;
+            (source_ as AssetSource).path.split("\\").last.split(".").first;
       case SourceType.file:
-        musicName =
-            (source_ as DeviceFileSource).path.split("/").last.split(".").first;
+        musicName = (source_ as DeviceFileSource)
+            .path
+            .split("\\")
+            .last
+            .split(".")
+            .first;
         break;
       case SourceType.bytes:
         musicName ??= "未知歌曲";

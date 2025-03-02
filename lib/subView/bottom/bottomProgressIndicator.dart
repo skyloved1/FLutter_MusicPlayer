@@ -25,7 +25,6 @@ class _BottomProgressIndicatorState extends State<BottomProgressIndicator> {
   void initState() {
     super.initState();
     positionSubscription = widget.audioPlayer.onPositionChanged.listen((event) {
-      print("Position changed: $event");
       setState(() {
         currentPos = event;
       });

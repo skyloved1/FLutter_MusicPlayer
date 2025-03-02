@@ -6,7 +6,6 @@ import 'package:fluent_ui/fluent_ui.dart';
 import '../globalVariable.dart';
 
 class BottomMusicPlayerProvider with ChangeNotifier {
-  int currentMusicIndex = -1;
   Uint8List? _musicBytes;
   Duration? _songDuration = Duration.zero;
   ValueNotifier<PlayerState?> playerStateNotifier = ValueNotifier(null);
@@ -15,6 +14,7 @@ class BottomMusicPlayerProvider with ChangeNotifier {
 
   ValueNotifier<Duration?> songDurationNotifier = ValueNotifier(Duration.zero);
 
+  ValueNotifier<int> currentMusicIndexNotifier = ValueNotifier(-1);
   final SourceType _sourceType = SourceType.url;
 
   late final ValueNotifier<List<MusicInfo>> musicListNotifier;
@@ -31,6 +31,12 @@ class BottomMusicPlayerProvider with ChangeNotifier {
   get songDuration => _songDuration;
 
   get playerState => playerStateNotifier.value;
+
+  get getCurrentMusicIndex => currentMusicIndexNotifier.value;
+
+  set currentMusicIndex(int value) {
+    currentMusicIndexNotifier.value = value;
+  }
 
   void setSongDuration(Duration value) {
     songDurationNotifier.value = value;
@@ -143,14 +149,14 @@ class BottomMusicPlayerProvider with ChangeNotifier {
   }
 
   void playNext() {
-    ++currentMusicIndex;
-    if (currentMusicIndex == -1) {
-      return;
+    currentMusicIndex = getCurrentMusicIndex + 1;
+    if (getCurrentMusicIndex == -1) {
+      this.currentMusicIndex = 0;
     }
-    if (currentMusicIndex == musicListNotifier.value.length - 1) {
+    if (getCurrentMusicIndex >= musicListNotifier.value.length) {
       currentMusicIndex = 0;
     }
-    playMusicAt(currentMusicIndex);
+    playMusicAt(getCurrentMusicIndex);
   }
 
   void playPrevious() {
