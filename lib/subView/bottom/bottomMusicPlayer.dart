@@ -363,7 +363,6 @@ class _LeftState extends State<Left> with SingleTickerProviderStateMixin {
                 ),
               ),
             ),
-            //TODO 修改为 Selector OR ValueListenableBuilder
             ValueListenableBuilder(
                 valueListenable: Provider.of<BottomMusicPlayerProvider>(context,
                         listen: true)
