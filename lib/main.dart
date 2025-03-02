@@ -81,7 +81,6 @@ class _MyAppState extends State<MyApp> {
     player.dispose();
     smtc.dispose();
     musicListNotifier.dispose();
-    windowManager.destroy();
     super.dispose();
   }
 
