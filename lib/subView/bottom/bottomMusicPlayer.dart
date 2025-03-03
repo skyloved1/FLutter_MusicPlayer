@@ -169,6 +169,7 @@ class Right extends StatelessWidget {
                                                 ],
                                               ),
                                               onPressed: () {
+                                                //TODO 调整优化清空逻辑 bug: 清空后仍能播放当前音乐，但显示的文件名不正确
                                                 Provider.of<BottomMusicPlayerProvider>(
                                                         context,
                                                         listen: false)
