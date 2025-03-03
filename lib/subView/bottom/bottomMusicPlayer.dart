@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart' as material;
 import 'package:netease_cloud_music/Icon/Icon.dart';
 import 'package:netease_cloud_music/subView/bottom/bottomProgressIndicator.dart';
 import 'package:provider/provider.dart';
@@ -64,6 +67,7 @@ class Right extends StatelessWidget {
       height: 75,
       child: Row(
         children: [
+          Spacer(),
           Tooltip(
             message: "添加音乐到播放列表",
             useMousePosition: true,
@@ -93,6 +97,108 @@ class Right extends StatelessWidget {
               ),
             ),
           ),
+          IconButton(
+              icon: Icon(
+                MyIcon.playList,
+                size: 24,
+              ),
+              onPressed: () {
+                showGeneralDialog(
+                    barrierColor: Colors.transparent,
+                    barrierLabel: "Play list",
+                    barrierDismissible: true,
+                    context: context,
+                    transitionBuilder: (context, a1, a2, widget) {
+                      return material.SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(1, 0),
+                          end: Offset.zero,
+                        ).animate(a1),
+                        child: widget,
+                      );
+                    },
+                    pageBuilder: (context, animation1, animation2) {
+                      return Stack(
+                        children: [
+                          Positioned(
+                            right: 0,
+                            top: 50 + 25,
+                            bottom: 75 + 25,
+                            child: SizedBox(
+                              width: 350,
+                              height: MediaQuery.of(context).size.height,
+                              child: Transform.rotate(
+                                angle: pi,
+                                child: material.Drawer(
+                                  key: ValueKey("playListDrawer"),
+                                  backgroundColor:
+                                      Color.fromRGBO(45, 45, 56, 1),
+                                  child: Transform.rotate(
+                                    angle: -pi,
+                                    child: CustomScrollView(
+                                      slivers: [
+                                        material.SliverAppBar(
+                                          backgroundColor:
+                                              Color.fromRGBO(45, 45, 56, 1),
+                                          leading: IconButton(
+                                            icon: Icon(
+                                              FluentIcons.padding_right,
+                                              color: Colors.white,
+                                            ),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                          title: const Text("播放列表"),
+                                          actions: [
+                                            IconButton(
+                                              icon: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(
+                                                    FluentIcons.delete,
+                                                    color: Colors.white,
+                                                    size: 24,
+                                                  ),
+                                                  Text(
+                                                    "清空",
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              onPressed: () {
+                                                Provider.of<BottomMusicPlayerProvider>(
+                                                        context,
+                                                        listen: false)
+                                                    .clearMusicList();
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                        SliverToBoxAdapter(
+                                          child: SizedBox(
+                                            height: 10,
+                                          ),
+                                        ),
+                                        SliverToBoxAdapter(
+                                          child: Divider(
+                                            style:
+                                                DividerThemeData(thickness: 1),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    });
+              })
         ],
       ),
     );
