@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:audioplayers/audioplayers.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -10,6 +8,7 @@ import 'package:provider/provider.dart';
 
 import '../../globalVariable.dart';
 import '../../provider/bottomMusicPlayerProvider.dart';
+import 'musicList.dart';
 
 class BottomMusicPlayer extends StatefulWidget {
   static BottomMusicPlayer? _instance;
@@ -113,91 +112,14 @@ class Right extends StatelessWidget {
                         position: Tween<Offset>(
                           begin: const Offset(1, 0),
                           end: Offset.zero,
-                        ).animate(a1),
+                        )
+                            .chain(CurveTween(curve: Curves.bounceInOut))
+                            .animate(a1),
                         child: widget,
                       );
                     },
                     pageBuilder: (context, animation1, animation2) {
-                      return Stack(
-                        children: [
-                          Positioned(
-                            right: 0,
-                            top: 50 + 25,
-                            bottom: 75 + 25,
-                            child: SizedBox(
-                              width: 350,
-                              height: MediaQuery.of(context).size.height,
-                              child: Transform.rotate(
-                                angle: pi,
-                                child: material.Drawer(
-                                  key: ValueKey("playListDrawer"),
-                                  backgroundColor:
-                                      Color.fromRGBO(45, 45, 56, 1),
-                                  child: Transform.rotate(
-                                    angle: -pi,
-                                    child: CustomScrollView(
-                                      slivers: [
-                                        material.SliverAppBar(
-                                          backgroundColor:
-                                              Color.fromRGBO(45, 45, 56, 1),
-                                          leading: IconButton(
-                                            icon: Icon(
-                                              FluentIcons.padding_right,
-                                              color: Colors.white,
-                                            ),
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                          ),
-                                          title: const Text("播放列表"),
-                                          actions: [
-                                            IconButton(
-                                              icon: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Icon(
-                                                    FluentIcons.delete,
-                                                    color: Colors.white,
-                                                    size: 24,
-                                                  ),
-                                                  Text(
-                                                    "清空",
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              onPressed: () {
-                                                //TODO 调整优化清空逻辑 bug: 清空后仍能播放当前音乐，但显示的文件名不正确
-                                                Provider.of<BottomMusicPlayerProvider>(
-                                                        context,
-                                                        listen: false)
-                                                    .clearMusicList();
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                        SliverToBoxAdapter(
-                                          child: SizedBox(
-                                            height: 10,
-                                          ),
-                                        ),
-                                        SliverToBoxAdapter(
-                                          child: Divider(
-                                            style:
-                                                DividerThemeData(thickness: 1),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
+                      return MusicList();
                     });
               })
         ],

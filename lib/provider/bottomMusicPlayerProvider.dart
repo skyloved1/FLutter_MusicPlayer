@@ -180,4 +180,12 @@ class BottomMusicPlayerProvider with ChangeNotifier {
     songDurationNotifier.dispose();
     super.dispose();
   }
+
+  void deleteMusic(int index) {
+    if (index == getCurrentMusicIndex) {
+      player.stop();
+      currentMusicIndex = -1;
+    }
+    removeMusicAt(index);
+  }
 }
