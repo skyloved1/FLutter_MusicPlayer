@@ -2,15 +2,19 @@ import 'dart:math';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as material;
+import 'package:netease_cloud_music/globalVariable.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../provider/bottomMusicPlayerProvider.dart';
 
 class MusicList extends StatelessWidget {
-  const MusicList({
+  MusicList({
     super.key,
   });
+
+  final GlobalKey<SliverAnimatedListState> listKey =
+      GlobalKey<SliverAnimatedListState>();
 
   @override
   Widget build(BuildContext context) {
@@ -58,32 +62,39 @@ class MusicList extends StatelessWidget {
                           IconButton(
                             icon: Icon(FluentIcons.delete),
                             onPressed: () {
-                              Provider.of<BottomMusicPlayerProvider>(context,
-                                      listen: false)
-                                  .clearMusicList();
+                              listKey.currentState
+                                  ?.removeAllItems((context, animation) {
+                                return SlideTransition(
+                                  position: Tween<Offset>(
+                                          begin: Offset(1, 0),
+                                          end: Offset(0, 0))
+                                      .animate(animation),
+                                  child: MusicListTile(
+                                    musicListNotifier: musicListNotifier,
+                                    listKey: listKey,
+                                    index: 0,
+                                  ),
+                                );
+                              });
+                              Future.delayed(Duration(milliseconds: 50), () {
+                                Provider.of<BottomMusicPlayerProvider>(context,
+                                        listen: false)
+                                    .clearMusicList();
+                              });
                             },
                           )
                         ],
                       ),
                       SliverAnimatedList(
+                          key: listKey,
                           initialItemCount: musicListNotifier.value.length,
                           itemBuilder: (context, index, animation) {
                             return SizeTransition(
                               sizeFactor: animation,
-                              child: ListTile(
-                                title: Text(
-                                    musicListNotifier.value[index].musicName ??
-                                        "未知歌曲"),
-                                subtitle: Text(musicListNotifier
-                                        .value[index].musicArtist ??
-                                    "未知歌手"),
-                                onPressed: () {
-                                  Provider.of<BottomMusicPlayerProvider>(
-                                      context,
-                                      listen: false)
-                                    ..currentMusicIndexNotifier.value = index
-                                    ..playMusicAt(index);
-                                },
+                              child: MusicListTile(
+                                musicListNotifier: musicListNotifier,
+                                listKey: listKey,
+                                index: index,
                               ),
                             );
                           })
@@ -95,6 +106,72 @@ class MusicList extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class MusicListTile extends StatelessWidget {
+  const MusicListTile({
+    super.key,
+    required this.musicListNotifier,
+    required this.listKey,
+    required this.index,
+  });
+
+  final ValueNotifier<List<MusicInfo>> musicListNotifier;
+  final GlobalKey<SliverAnimatedListState> listKey;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    Image? musicAvatar;
+    if (musicListNotifier.value[index].musicAvatar != null) {
+      musicAvatar = Image.network(musicListNotifier.value[index].musicAvatar!);
+    }
+    return ListTile(
+      leading: musicAvatar ?? Icon(FluentIcons.music_note),
+      title: Text(musicListNotifier.value[index].musicName ?? "未知歌曲"),
+      subtitle: Text(musicListNotifier.value[index].musicArtist ?? "未知歌手"),
+      onPressed: () {
+        Provider.of<BottomMusicPlayerProvider>(context, listen: false)
+          ..currentMusicIndexNotifier.value = index
+          ..playMusicAt(index);
+      },
+      trailing: IconButton(
+        icon: Icon(
+          FluentIcons.delete,
+          size: 24,
+        ),
+        onPressed: () {
+          final provider =
+              Provider.of<BottomMusicPlayerProvider>(context, listen: false);
+          final musicInfo = musicListNotifier.value[index];
+
+          listKey.currentState?.removeItem(
+            index,
+            (context, animation) {
+              var offset = Tween<Offset>(begin: Offset(1, 0), end: Offset(0, 0))
+                  .chain(CurveTween(curve: Curves.decelerate))
+                  .animate(animation);
+              return SlideTransition(
+                position: offset,
+                child: ListTile(
+                  leading: musicAvatar ?? Icon(FluentIcons.music_note),
+                  title:
+                      Text(musicListNotifier.value[index].musicName ?? "未知歌曲"),
+                  subtitle: Text(
+                      musicListNotifier.value[index].musicArtist ?? "未知歌手"),
+                ),
+              );
+            },
+            duration: Duration(milliseconds: 250),
+          );
+
+          Future.delayed(Duration(milliseconds: 50), () {
+            provider.removeMusicAt(index);
+          });
+        },
+      ),
     );
   }
 }

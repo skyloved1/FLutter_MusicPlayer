@@ -116,6 +116,7 @@ class BottomMusicPlayerProvider with ChangeNotifier {
 
   void removeMusicAt(int index) {
     musicListNotifier.value.removeAt(index);
+    //TODO 如果当前播放的音乐被删除，应该停止播放
   }
 
   void insertMusic(int index, MusicInfo musicInfo) {
