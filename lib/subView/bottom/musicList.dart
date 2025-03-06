@@ -47,7 +47,7 @@ class MusicList extends StatelessWidget {
                 backgroundColor: Color.fromRGBO(45, 45, 56, 1),
                 child: Transform.rotate(
                   angle: -pi,
-                  //TODO  完成播放列表组件
+                  //TODO  完成播放列表组件 添加音乐avatar
                   child: CustomScrollView(
                     slivers: [
                       material.SliverAppBar(
@@ -86,18 +86,16 @@ class MusicList extends StatelessWidget {
                         ],
                       ),
                       SliverAnimatedList(
-                          key: listKey,
-                          initialItemCount: musicListNotifier.value.length,
-                          itemBuilder: (context, index, animation) {
-                            return SizeTransition(
-                              sizeFactor: animation,
-                              child: MusicListTile(
-                                musicListNotifier: musicListNotifier,
-                                listKey: listKey,
-                                index: index,
-                              ),
-                            );
-                          })
+                        key: listKey,
+                        initialItemCount: musicListNotifier.value.length,
+                        itemBuilder: (context, index, animation) {
+                          return MusicListTile(
+                            musicListNotifier: musicListNotifier,
+                            listKey: listKey,
+                            index: index,
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -110,7 +108,7 @@ class MusicList extends StatelessWidget {
   }
 }
 
-class MusicListTile extends StatelessWidget {
+class MusicListTile extends StatefulWidget {
   const MusicListTile({
     super.key,
     required this.musicListNotifier,
@@ -123,19 +121,63 @@ class MusicListTile extends StatelessWidget {
   final int index;
 
   @override
+  State<MusicListTile> createState() => _MusicListTileState();
+}
+
+class _MusicListTileState extends State<MusicListTile> {
+  @override
   Widget build(BuildContext context) {
     Image? musicAvatar;
-    if (musicListNotifier.value[index].musicAvatar != null) {
-      musicAvatar = Image.network(musicListNotifier.value[index].musicAvatar!);
+    var currentIndexValueNotifier =
+        Provider.of<BottomMusicPlayerProvider>(context, listen: true)
+            .currentMusicIndexNotifier;
+    if (widget.musicListNotifier.value[widget.index].musicAvatar != null) {
+      musicAvatar = Image.network(
+          widget.musicListNotifier.value[widget.index].musicAvatar!);
     }
+    return ValueListenableBuilder<int>(
+      valueListenable: currentIndexValueNotifier,
+      builder: (BuildContext context, value, Widget? child) {
+        if (value == widget.index) {
+          return MusicListTileChild(musicAvatar: musicAvatar, widget: widget);
+        }
+
+        return child!;
+      },
+      child: MusicListTileChild(musicAvatar: musicAvatar, widget: widget),
+    );
+  }
+}
+
+class MusicListTileChild extends StatelessWidget {
+  const MusicListTileChild({
+    super.key,
+    required this.musicAvatar,
+    required this.widget,
+  });
+
+  final Image? musicAvatar;
+  final MusicListTile widget;
+
+  @override
+  Widget build(BuildContext context) {
     return ListTile(
+      tileColor: Provider.of<BottomMusicPlayerProvider>(context, listen: false)
+                  .getCurrentMusicIndex ==
+              widget.index
+          ? WidgetStatePropertyAll<Color>(Colors.grey[120].withAlpha(255 ~/ 2))
+          : null,
       leading: musicAvatar ?? Icon(FluentIcons.music_note),
-      title: Text(musicListNotifier.value[index].musicName ?? "未知歌曲"),
-      subtitle: Text(musicListNotifier.value[index].musicArtist ?? "未知歌手"),
+      title: Text(widget.musicListNotifier.value.isEmpty
+          ? "未知歌曲"
+          : widget.musicListNotifier.value[widget.index].musicName ?? "未知歌曲"),
+      subtitle: Text(widget.musicListNotifier.value.isEmpty
+          ? "未知歌曲"
+          : widget.musicListNotifier.value[widget.index].musicArtist ?? "未知歌手"),
       onPressed: () {
         Provider.of<BottomMusicPlayerProvider>(context, listen: false)
-          ..currentMusicIndexNotifier.value = index
-          ..playMusicAt(index);
+          ..currentMusicIndexNotifier.value = widget.index
+          ..playMusicAt(widget.index);
       },
       trailing: IconButton(
         icon: Icon(
@@ -145,10 +187,10 @@ class MusicListTile extends StatelessWidget {
         onPressed: () {
           final provider =
               Provider.of<BottomMusicPlayerProvider>(context, listen: false);
-          final musicInfo = musicListNotifier.value[index];
+          final musicInfo = widget.musicListNotifier.value[widget.index];
 
-          listKey.currentState?.removeItem(
-            index,
+          widget.listKey.currentState?.removeItem(
+            widget.index,
             (context, animation) {
               var offset = Tween<Offset>(begin: Offset(1, 0), end: Offset(0, 0))
                   .chain(CurveTween(curve: Curves.decelerate))
@@ -157,10 +199,12 @@ class MusicListTile extends StatelessWidget {
                 position: offset,
                 child: ListTile(
                   leading: musicAvatar ?? Icon(FluentIcons.music_note),
-                  title:
-                      Text(musicListNotifier.value[index].musicName ?? "未知歌曲"),
-                  subtitle: Text(
-                      musicListNotifier.value[index].musicArtist ?? "未知歌手"),
+                  title: Text(
+                      widget.musicListNotifier.value[widget.index].musicName ??
+                          "未知歌曲"),
+                  subtitle: Text(widget
+                          .musicListNotifier.value[widget.index].musicArtist ??
+                      "未知歌手"),
                 ),
               );
             },
@@ -168,7 +212,7 @@ class MusicListTile extends StatelessWidget {
           );
 
           Future.delayed(Duration(milliseconds: 50), () {
-            provider.removeMusicAt(index);
+            provider.removeMusicAt(widget.index);
           });
         },
       ),

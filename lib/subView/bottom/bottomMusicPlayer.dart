@@ -72,6 +72,7 @@ class Right extends StatelessWidget {
             useMousePosition: true,
             triggerMode: TooltipTriggerMode.manual,
             //TODO 尝试添加动画效果
+            //TODO 添加选择文件夹并搜索文件夹内的音乐文件
             child: IconButton(
               key: ValueKey('add_music_button'),
               onPressed: () async {
@@ -169,7 +170,9 @@ class Mid extends StatelessWidget {
                       size: 20,
                     ),
                     onPressed: () {
-                      //TODO 播放上一首歌曲
+                      Provider.of<BottomMusicPlayerProvider>(context,
+                              listen: false)
+                          .playPrevious();
                     },
                   ),
                   ValueListenableBuilder<PlayerState?>(

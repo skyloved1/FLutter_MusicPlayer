@@ -112,11 +112,19 @@ class BottomMusicPlayerProvider with ChangeNotifier {
 
   void clearMusicList() {
     musicListNotifier.value.clear();
+    setPlayerState(PlayerState.paused);
+    currentMusicIndex = -1;
+    player.release();
   }
 
   void removeMusicAt(int index) {
     musicListNotifier.value.removeAt(index);
     //TODO 如果当前播放的音乐被删除，应该停止播放
+    if (index == getCurrentMusicIndex) {
+      setPlayerState(PlayerState.paused);
+      player.release();
+      currentMusicIndex = getCurrentMusicIndex - 1;
+    }
   }
 
   void insertMusic(int index, MusicInfo musicInfo) {
@@ -161,17 +169,12 @@ class BottomMusicPlayerProvider with ChangeNotifier {
   }
 
   void playPrevious() {
-    int index = musicListNotifier.value
-        .indexWhere((element) => element.source == player.source);
-    if (index == -1) {
-      return;
+    currentMusicIndex = getCurrentMusicIndex - 1;
+    if (getCurrentMusicIndex == -1) {
+      currentMusicIndex = musicListNotifier.value.length - 1;
     }
-    if (index == 0) {
-      index = musicListNotifier.value.length - 1;
-    } else {
-      index--;
-    }
-    playMusicAt(index);
+
+    playMusicAt(getCurrentMusicIndex);
   }
 
   @override
