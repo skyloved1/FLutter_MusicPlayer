@@ -4,6 +4,7 @@ import 'package:netease_cloud_music/subView/account/avatar.dart';
 import 'package:netease_cloud_music/subView/bottom/bottomMusicPlayer.dart';
 import 'package:netease_cloud_music/subView/homePaneItemBody/MyMusic.dart';
 import 'package:netease_cloud_music/subView/homePaneItemBody/recommend.dart';
+import 'package:netease_cloud_music/subView/seetingPage/seetingDemo2.dart';
 import 'package:window_manager/window_manager.dart';
 
 class HomePage extends StatefulWidget {
@@ -94,15 +95,6 @@ class NavigationViewRoute extends StatefulWidget {
     ),
   );
   final avatar = AvatarWithLoginAndOut();
-  final setting = IconButton(
-      icon: Icon(
-        MyIcon.setting,
-        size: 20,
-        color: Colors.grey[80],
-      ),
-      onPressed: () {
-        //TODO 打开设置窗口
-      });
 
   @override
   State<NavigationViewRoute> createState() => _NavigationViewRouteState();
@@ -140,7 +132,18 @@ class _NavigationViewRouteState extends State<NavigationViewRoute> {
           mainAxisSize: MainAxisSize.min,
           children: [
             //widget.avatar,
-            widget.setting,
+            IconButton(
+                icon: Icon(
+                  MyIcon.setting,
+                  size: 20,
+                  color: Colors.grey[80],
+                ),
+                onPressed: () {
+                  setState(() {
+                    //8是 正好是 设置页面的panItem的index
+                    seletedIndex = 8;
+                  });
+                }),
             SizedBox(
               width: 15,
             ),
@@ -163,28 +166,31 @@ class _NavigationViewRouteState extends State<NavigationViewRoute> {
         ),
       ),
       pane: NavigationPane(
-        indicator: StickyNavigationIndicator(
-          color: Colors.white,
-        ),
-        size: NavigationPaneSize(
-          openMaxWidth: 175,
-          compactWidth: 50,
-        ),
-        displayMode: PaneDisplayMode.open,
-        header: SizedBox(
-          height: 25,
-        ),
-        selected: seletedIndex,
-        onChanged: (index) {
-          setState(() {
-            seletedIndex = index;
-          });
-        },
-        onItemPressed: (index) {
-          print("index: $index");
-        },
-        items: widget.items,
-      ),
+          indicator: StickyNavigationIndicator(
+            color: Colors.white,
+          ),
+          size: NavigationPaneSize(
+            openMaxWidth: 175,
+            compactWidth: 50,
+          ),
+          displayMode: PaneDisplayMode.open,
+          header: SizedBox(
+            height: 25,
+          ),
+          selected: seletedIndex,
+          onChanged: (index) {
+            setState(() {
+              seletedIndex = index;
+            });
+          },
+          onItemPressed: (index) {
+            print("index: $index");
+          },
+          items: widget.items,
+          footerItems: [
+            //设置页面
+            PaneItem(icon: SizedBox(), body: const SettingDemo2()),
+          ]),
     );
   }
 }
