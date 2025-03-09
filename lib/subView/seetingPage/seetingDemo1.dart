@@ -14,21 +14,38 @@ class _SettingDemo1State extends State<SettingDemo1>
   ScrollController scrollController = ScrollController();
   bool isAnimating = false;
   List<Widget> tabs = [
-    material.Tab(
-      text: "账号",
+    DefaultTextStyle(
+      style: TextStyle(
+        fontFamily: "si_yuan_hei_ti",
+        fontWeight: FontWeight.w900,
+      ),
+      child: material.Tab(
+        text: "账号",
+      ),
     ),
-    material.Tab(
-      text: "通用",
+    DefaultTextStyle(
+      style: TextStyle(
+        fontFamily: "si_yuan_hei_ti",
+        fontWeight: FontWeight.w900,
+      ),
+      child: material.Tab(
+        text: "通用",
+      ),
     ),
-    material.Tab(
-      text: "关于",
+    DefaultTextStyle(
+      style: TextStyle(
+        fontFamily: "si_yuan_hei_ti",
+        fontWeight: FontWeight.w900,
+      ),
+      child: material.Tab(
+        text: "关于",
+      ),
     ),
   ];
 
   @override
   void initState() {
     tabController = material.TabController(length: tabs.length, vsync: this);
-    tabController?.addListener(_onTabChanged);
     scrollController.addListener(_onScroll);
     super.initState();
   }
@@ -46,7 +63,6 @@ class _SettingDemo1State extends State<SettingDemo1>
       index = 2;
     }
     tabController?.animateTo(index);
-    print("Current component index: $index");
   }
 
   void _onTabChanged() {
@@ -94,53 +110,96 @@ class _SettingDemo1State extends State<SettingDemo1>
   @override
   Widget build(BuildContext context) {
     return material.Material(
+        textStyle: material.TextStyle(
+            fontFamily: "si_yuan_hei_ti", fontWeight: FontWeight.w900),
         color: material.Colors.transparent,
         type: material.MaterialType.transparency,
-        child: material.Scaffold(
-            appBar: material.TabBar(
-              tabs: tabs,
-              controller: tabController,
-            ),
-            body: NotificationListener<ScrollNotification>(
-              onNotification: (scrollNotification) {
-                _onScroll();
-                return false;
-              },
-              child: ListView(
-                controller: scrollController,
-                children: [
-                  Container(
-                    height: 200,
-                    child: material.ListView(children: [
-                      ListTile(
-                        title: Text("账号"),
-                      ),
-                      ListTile(
-                        title: Text("通用"),
-                      ),
-                      ListTile(
-                        title: Text("关于"),
-                      ),
-                    ]),
+        surfaceTintColor: material.Colors.transparent,
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        borderOnForeground: false,
+        child: DefaultTextStyle(
+          style: TextStyle(
+            fontFamily: "si_yuan_hei_ti",
+            fontWeight: FontWeight.w900,
+          ),
+          child: material.Scaffold(
+            backgroundColor: Colors.transparent,
+            appBar: material.AppBar(
+                toolbarHeight: 75,
+                title: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: const Text(
+                    "设置",
+                    style: material.TextStyle(
+                      fontFamily: "si_yuan_hei_ti",
+                      fontSize: 32,
+                      fontWeight: material.FontWeight.w500,
+                    ),
                   ),
-                  Container(
-                    height: 2000,
-                    child: material.ListView(children: [
-                      ListTile(
-                        title: Text("通用"),
+                ),
+                surfaceTintColor: material.Colors.transparent,
+                backgroundColor: material.Colors.transparent),
+            body: material.Scaffold(
+                backgroundColor: material.Colors.transparent,
+                appBar: material.TabBar(
+                  onTap: (index) {
+                    _onTabChanged();
+                  },
+                  overlayColor:
+                      material.WidgetStateProperty.resolveWith<Color?>(
+                          (Set<material.WidgetState> states) {
+                    if (states.isHovered) {
+                      return material.Colors.grey[850];
+                    }
+                  }),
+                  splashFactory: material.NoSplash.splashFactory,
+                  dividerColor: Colors.transparent,
+                  tabs: tabs,
+                  controller: tabController,
+                ),
+                body: NotificationListener<ScrollNotification>(
+                  onNotification: (scrollNotification) {
+                    _onScroll();
+                    return true;
+                  },
+                  child: ListView(
+                    controller: scrollController,
+                    children: [
+                      Container(
+                        height: 200,
+                        child: material.ListView(children: [
+                          ListTile(
+                            title: Text("账号"),
+                          ),
+                          ListTile(
+                            title: Text("通用"),
+                          ),
+                          ListTile(
+                            title: Text("关于"),
+                          ),
+                        ]),
                       ),
-                    ]),
-                  ),
-                  Container(
-                    height: 2000,
-                    child: material.ListView(children: [
-                      ListTile(
-                        title: Text("关于"),
+                      Container(
+                        height: 2000,
+                        child: material.ListView(children: [
+                          ListTile(
+                            title: Text("通用"),
+                          ),
+                        ]),
                       ),
-                    ]),
+                      Container(
+                        height: 2000,
+                        child: material.ListView(children: [
+                          ListTile(
+                            title: Text("关于"),
+                          ),
+                        ]),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            )));
+                )),
+          ),
+        ));
   }
 }
