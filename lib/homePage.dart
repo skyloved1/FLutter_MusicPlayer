@@ -4,7 +4,7 @@ import 'package:netease_cloud_music/subView/account/avatar.dart';
 import 'package:netease_cloud_music/subView/bottom/bottomMusicPlayer.dart';
 import 'package:netease_cloud_music/subView/homePaneItemBody/MyMusic.dart';
 import 'package:netease_cloud_music/subView/homePaneItemBody/recommend.dart';
-import 'package:netease_cloud_music/subView/seetingPage/seetingDemo2.dart';
+import 'package:netease_cloud_music/subView/seetingPage/seetingDemo1.dart';
 import 'package:window_manager/window_manager.dart';
 
 class HomePage extends StatefulWidget {
@@ -189,7 +189,7 @@ class _NavigationViewRouteState extends State<NavigationViewRoute> {
           items: widget.items,
           footerItems: [
             //设置页面
-            PaneItem(icon: SizedBox(), body: const SettingDemo2()),
+            PaneItem(icon: SizedBox(), body: const SettingDemo1()),
           ]),
     );
   }
