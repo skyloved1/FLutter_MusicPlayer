@@ -14,9 +14,7 @@ class _SettingDemo1State extends State<SettingDemo1>
   ScrollController scrollController = ScrollController();
   bool isAnimating = false;
 
-  final GlobalKey posKey1 = GlobalKey();
-  final GlobalKey posKey2 = GlobalKey();
-  final GlobalKey posKey3 = GlobalKey();
+  late final List<GlobalKey<State<StatedWidgetInSettingListTile>>> posKeyList;
 
   List<Widget> tabs = [
     DefaultTextStyle(
@@ -47,11 +45,14 @@ class _SettingDemo1State extends State<SettingDemo1>
       ),
     ),
   ];
-
   @override
   void initState() {
     tabController = material.TabController(length: tabs.length, vsync: this);
     scrollController.addListener(_onScroll);
+    posKeyList = tabs
+        .map((e) => GlobalKey<State<StatedWidgetInSettingListTile>>(
+            debugLabel: e.toString()))
+        .toList();
     super.initState();
   }
 
@@ -59,38 +60,28 @@ class _SettingDemo1State extends State<SettingDemo1>
     if (isAnimating) return;
 
     final scrollPosition = scrollController.position.pixels;
-    int index;
-    if (scrollPosition < _getPosition(posKey1)) {
-      index = 0;
-    } else if (scrollPosition < _getPosition(posKey2)) {
-      index = 1;
-    } else {
-      index = 2;
+    for (var key in posKeyList) {
+      int index = 0;
+      final position = _getPosition(key);
+      if (scrollPosition >= position) {
+        index = posKeyList.indexOf(key);
+        tabController?.animateTo(index);
+      }
     }
-    tabController?.animateTo(index);
   }
 
   void _onTabChanged() {
     if (tabController?.indexIsChanging ?? false) {
       isAnimating = true;
-      switch (tabController?.index) {
-        case 0:
-          _scrollToPosition(posKey1);
-          break;
-        case 1:
-          _scrollToPosition(posKey2);
-          break;
-        case 2:
-          _scrollToPosition(posKey3);
-          break;
-      }
+      final index = tabController?.index ?? 0;
+      final key = posKeyList[index];
+      _scrollToPosition(key);
     }
   }
 
   double _getPosition(GlobalKey key) {
     final context = key.currentContext;
-
-    final renderBox = context?.findRenderObject();
+    final renderBox = context!.findRenderObject();
     if (renderBox is RenderBox) {
       return renderBox.localToGlobal(Offset.zero).dy;
     }
@@ -99,6 +90,7 @@ class _SettingDemo1State extends State<SettingDemo1>
 
   void _scrollToPosition(GlobalKey key) {
     final position = _getPosition(key);
+    print("Position:${position}");
     scrollController
         .animateTo(position,
             duration: Duration(milliseconds: 300), curve: Curves.easeInOut)
@@ -174,38 +166,38 @@ class _SettingDemo1State extends State<SettingDemo1>
                   child: ListView(
                     controller: scrollController,
                     children: [
-                      Container(
-                        key: posKey1,
-                        height: 200,
-                        child: material.ListView(children: [
-                          ListTile(
-                            title: Text("账号"),
-                          ),
-                          ListTile(
-                            title: Text("通用"),
-                          ),
-                          ListTile(
-                            title: Text("关于"),
-                          ),
-                        ]),
+                      StatedWidgetInSettingListTile(
+                        key: posKeyList[0],
+                        child: SizedBox(
+                          height: 200,
+                          child: material.ListView(children: [
+                            ListTile(
+                              title: Text("账号"),
+                            ),
+                          ]),
+                        ),
                       ),
-                      Container(
-                        key: posKey2,
-                        height: 2000,
-                        child: material.ListView(children: [
-                          ListTile(
-                            title: Text("通用"),
-                          ),
-                        ]),
+                      StatedWidgetInSettingListTile(
+                        key: posKeyList[1],
+                        child: SizedBox(
+                          height: 1000,
+                          child: material.ListView(children: [
+                            ListTile(
+                              title: Text("通用"),
+                            ),
+                          ]),
+                        ),
                       ),
-                      Container(
-                        key: posKey3,
-                        height: 2000,
-                        child: material.ListView(children: [
-                          ListTile(
-                            title: Text("关于"),
-                          ),
-                        ]),
+                      StatedWidgetInSettingListTile(
+                        key: posKeyList[2],
+                        child: SizedBox(
+                          height: 2000,
+                          child: material.ListView(children: [
+                            ListTile(
+                              title: Text("关于"),
+                            ),
+                          ]),
+                        ),
                       ),
                     ],
                   ),
@@ -213,4 +205,38 @@ class _SettingDemo1State extends State<SettingDemo1>
           ),
         ));
   }
+}
+
+/// 用于在设置页面中的ListTile中使用StatefulWidget
+/// [AutomaticKeepAliveClientMixin]用于保持状态,避免滑出屏幕后对应的[RenderBox]消失，导致不能寻找滑动位置
+class StatedWidgetInSettingListTile extends StatefulWidget {
+  const StatedWidgetInSettingListTile({super.key, required this.child});
+  final Widget child;
+
+  static int count = 0;
+
+  @override
+  State<StatedWidgetInSettingListTile> createState() =>
+      _StatedWidgetInSettingListTileState();
+}
+
+class _StatedWidgetInSettingListTileState
+    extends State<StatedWidgetInSettingListTile>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return SizedBox(
+      child: widget.child,
+    );
+  }
+
+  @override
+  void dispose() {
+    print("current StatedWidgetInSettingListTileState have been disposed");
+    super.dispose();
+  }
+
+  @override
+  bool get wantKeepAlive => true;
 }
