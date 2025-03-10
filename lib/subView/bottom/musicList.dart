@@ -18,9 +18,6 @@ class MusicList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("列表重建");
-    print(
-        "重建后的列表长度为${Provider.of<BottomMusicPlayerProvider>(context, listen: false).musicListNotifier.value.length}");
     final musicListNotifier =
         Provider.of<BottomMusicPlayerProvider>(context, listen: true)
             .musicListNotifier;

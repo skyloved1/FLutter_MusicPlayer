@@ -13,6 +13,11 @@ class _SettingDemo1State extends State<SettingDemo1>
   material.TabController? tabController;
   ScrollController scrollController = ScrollController();
   bool isAnimating = false;
+
+  final GlobalKey posKey1 = GlobalKey();
+  final GlobalKey posKey2 = GlobalKey();
+  final GlobalKey posKey3 = GlobalKey();
+
   List<Widget> tabs = [
     DefaultTextStyle(
       style: TextStyle(
@@ -55,9 +60,9 @@ class _SettingDemo1State extends State<SettingDemo1>
 
     final scrollPosition = scrollController.position.pixels;
     int index;
-    if (scrollPosition < 200) {
+    if (scrollPosition < _getPosition(posKey1)) {
       index = 0;
-    } else if (scrollPosition < 2200) {
+    } else if (scrollPosition < _getPosition(posKey2)) {
       index = 1;
     } else {
       index = 2;
@@ -70,34 +75,36 @@ class _SettingDemo1State extends State<SettingDemo1>
       isAnimating = true;
       switch (tabController?.index) {
         case 0:
-          scrollController
-              .animateTo(0,
-                  duration: Duration(milliseconds: 300),
-                  curve: Curves.easeInOut)
-              .then((_) {
-            isAnimating = false;
-          });
+          _scrollToPosition(posKey1);
           break;
         case 1:
-          scrollController
-              .animateTo(200,
-                  duration: Duration(milliseconds: 300),
-                  curve: Curves.easeInOut)
-              .then((_) {
-            isAnimating = false;
-          });
+          _scrollToPosition(posKey2);
           break;
         case 2:
-          scrollController
-              .animateTo(2200,
-                  duration: Duration(milliseconds: 300),
-                  curve: Curves.easeInOut)
-              .then((_) {
-            isAnimating = false;
-          });
+          _scrollToPosition(posKey3);
           break;
       }
     }
+  }
+
+  double _getPosition(GlobalKey key) {
+    final context = key.currentContext;
+
+    final renderBox = context?.findRenderObject();
+    if (renderBox is RenderBox) {
+      return renderBox.localToGlobal(Offset.zero).dy;
+    }
+    return 0.0;
+  }
+
+  void _scrollToPosition(GlobalKey key) {
+    final position = _getPosition(key);
+    scrollController
+        .animateTo(position,
+            duration: Duration(milliseconds: 300), curve: Curves.easeInOut)
+        .then((_) {
+      isAnimating = false;
+    });
   }
 
   @override
@@ -152,7 +159,6 @@ class _SettingDemo1State extends State<SettingDemo1>
                     if (states.isHovered) {
                       return material.Colors.grey[850];
                     }
-                    //也可以设置其他状态的颜色，这里仅设置hover悬停时的颜色，其他均为透明
                     return Colors.transparent;
                   }),
                   splashFactory: material.NoSplash.splashFactory,
@@ -169,6 +175,7 @@ class _SettingDemo1State extends State<SettingDemo1>
                     controller: scrollController,
                     children: [
                       Container(
+                        key: posKey1,
                         height: 200,
                         child: material.ListView(children: [
                           ListTile(
@@ -183,6 +190,7 @@ class _SettingDemo1State extends State<SettingDemo1>
                         ]),
                       ),
                       Container(
+                        key: posKey2,
                         height: 2000,
                         child: material.ListView(children: [
                           ListTile(
@@ -191,6 +199,7 @@ class _SettingDemo1State extends State<SettingDemo1>
                         ]),
                       ),
                       Container(
+                        key: posKey3,
                         height: 2000,
                         child: material.ListView(children: [
                           ListTile(
