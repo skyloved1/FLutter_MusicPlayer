@@ -152,6 +152,8 @@ class _SettingDemo1State extends State<SettingDemo1>
                     if (states.isHovered) {
                       return material.Colors.grey[850];
                     }
+                    //也可以设置其他状态的颜色，这里仅设置hover悬停时的颜色，其他均为透明
+                    return Colors.transparent;
                   }),
                   splashFactory: material.NoSplash.splashFactory,
                   dividerColor: Colors.transparent,
