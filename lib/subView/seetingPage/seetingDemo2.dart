@@ -36,7 +36,10 @@ class _SettingDemo2State extends State<SettingDemo2>
         key: tabViewsKeys[0],
         height: 200,
         child: ListTile(
-          title: Text("账号"),
+          title: Text(
+            "账号",
+            style: TextStyle(fontFamily: "黑体"),
+          ),
         ),
       ),
       Container(
@@ -44,7 +47,10 @@ class _SettingDemo2State extends State<SettingDemo2>
         height: 2000,
         child: ListView(children: [
           ListTile(
-            title: Text("通用"),
+            title: Text(
+              "通用",
+              style: TextStyle(fontFamily: "黑体"),
+            ),
           ),
         ]),
       ),
@@ -53,7 +59,10 @@ class _SettingDemo2State extends State<SettingDemo2>
         height: 2000,
         child: ListView(children: [
           ListTile(
-            title: Text("关于"),
+            title: Text(
+              "关于",
+              style: TextStyle(fontFamily: "黑体"),
+            ),
           ),
         ]),
       ),
@@ -95,29 +104,33 @@ class _SettingDemo2State extends State<SettingDemo2>
         return false;
       },
       child: Material(
-        child: CustomScrollView(
+        textStyle: TextStyle(fontFamily: "黑体"),
+        child: Scrollbar(
           controller: _scrollController,
-          slivers: [
-            SliverPersistentHeader(
-                key: headerKey,
-                pinned: true,
-                delegate: _SliverAppBarDelegate(
-                  onTap: (index) {
-                    _scrollController.animateTo(
-                      caculateScrollOffset(index),
-                      duration: Duration(milliseconds: 200),
-                      curve: Curves.bounceInOut,
-                    );
-                  },
-                  tabController: _tabController,
-                  tabs: tabs,
-                  height: 120,
-                )),
-            for (int i = 0; i < tabs.length; i++)
-              SliverToBoxAdapter(
-                child: tabViews[i],
-              ),
-          ],
+          child: CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              SliverPersistentHeader(
+                  key: headerKey,
+                  pinned: true,
+                  delegate: _SliverAppBarDelegate(
+                    onTap: (index) {
+                      _scrollController.animateTo(
+                        caculateScrollOffset(index),
+                        duration: Duration(milliseconds: 200),
+                        curve: Curves.bounceInOut,
+                      );
+                    },
+                    tabController: _tabController,
+                    tabs: tabs,
+                    height: 120,
+                  )),
+              for (int i = 0; i < tabs.length; i++)
+                SliverToBoxAdapter(
+                  child: tabViews[i],
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -159,6 +172,17 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
             ),
           ),
           TabBar(
+            labelStyle: TextStyle(fontFamily: "黑体"),
+            overlayColor: WidgetStateProperty.resolveWith<Color?>(
+                (Set<WidgetState> states) {
+              if (states.contains(WidgetState.hovered)) {
+                return Colors.grey[850];
+              }
+              //也可以设置其他状态的颜色，这里仅设置hover悬停时的颜色，其他均为透明
+              return Colors.transparent;
+            }),
+            splashFactory: NoSplash.splashFactory,
+            dividerColor: Colors.transparent,
             onTap: onTap,
             controller: tabController,
             tabs: tabs,
