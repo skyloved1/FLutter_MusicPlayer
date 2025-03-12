@@ -206,6 +206,20 @@ class Mid extends StatelessWidget {
                           final provider =
                               Provider.of<BottomMusicPlayerProvider>(context,
                                   listen: false);
+                          if (provider.getCurrentMusicIndex == -1) {
+                            displayInfoBar(context, builder: (context, close) {
+                              return InfoBar(
+                                title: const Text('列表为空！'),
+                                content: const Text('列表为空，不能播放音乐，请先添加音乐到播放列表！'),
+                                action: IconButton(
+                                  icon: const Icon(FluentIcons.clear),
+                                  onPressed: close,
+                                ),
+                                severity: InfoBarSeverity.error,
+                              );
+                            });
+                            return;
+                          }
                           if (playerState == PlayerState.playing) {
                             provider.setPlayerState(PlayerState.paused);
                           } else {

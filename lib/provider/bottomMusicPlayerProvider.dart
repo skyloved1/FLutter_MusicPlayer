@@ -104,6 +104,10 @@ class BottomMusicPlayerProvider with ChangeNotifier {
 
   void addMusic(MusicInfo musicInfo) {
     musicListNotifier.value.add(musicInfo);
+    if (getCurrentMusicIndex == -1) {
+      currentMusicIndex = 0;
+      musicInfo.source.setOnPlayer(player);
+    }
   }
 
   void removeMusicWhere(bool Function(MusicInfo) callback) {
@@ -119,7 +123,7 @@ class BottomMusicPlayerProvider with ChangeNotifier {
 
   void removeMusicAt(int index) {
     musicListNotifier.value.removeAt(index);
-    //TODO 如果当前播放的音乐被删除，应该停止播放
+    // 如果当前播放的音乐被删除，应该停止播放
     if (index == getCurrentMusicIndex) {
       setPlayerState(PlayerState.paused);
       player.release();
