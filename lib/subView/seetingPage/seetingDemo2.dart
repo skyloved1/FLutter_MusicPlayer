@@ -105,32 +105,29 @@ class _SettingDemo2State extends State<SettingDemo2>
       },
       child: Material(
         textStyle: TextStyle(fontFamily: "黑体"),
-        child: Scrollbar(
+        child: CustomScrollView(
           controller: _scrollController,
-          child: CustomScrollView(
-            controller: _scrollController,
-            slivers: [
-              SliverPersistentHeader(
-                  key: headerKey,
-                  pinned: true,
-                  delegate: _SliverAppBarDelegate(
-                    onTap: (index) {
-                      _scrollController.animateTo(
-                        caculateScrollOffset(index),
-                        duration: Duration(milliseconds: 200),
-                        curve: Curves.bounceInOut,
-                      );
-                    },
-                    tabController: _tabController,
-                    tabs: tabs,
-                    height: 120,
-                  )),
-              for (int i = 0; i < tabs.length; i++)
-                SliverToBoxAdapter(
-                  child: tabViews[i],
-                ),
-            ],
-          ),
+          slivers: [
+            SliverPersistentHeader(
+                key: headerKey,
+                pinned: true,
+                delegate: _SliverAppBarDelegate(
+                  onTap: (index) {
+                    _scrollController.animateTo(
+                      caculateScrollOffset(index),
+                      duration: Duration(milliseconds: 200),
+                      curve: Curves.bounceInOut,
+                    );
+                  },
+                  tabController: _tabController,
+                  tabs: tabs,
+                  height: 120,
+                )),
+            for (int i = 0; i < tabs.length; i++)
+              SliverToBoxAdapter(
+                child: tabViews[i],
+              ),
+          ],
         ),
       ),
     );
