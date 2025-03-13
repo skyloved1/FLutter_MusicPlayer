@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:audioplayers/audioplayers.dart';
@@ -24,11 +25,13 @@ class BottomMusicPlayerProvider with ChangeNotifier {
   late final AudioPlayer player;
   late final SMTCWindows smtcWindows;
 
+  late final StreamSubscription<PressedButton> buttonPressStream;
+
   BottomMusicPlayerProvider(
       {required this.player,
       required this.musicListNotifier,
       required this.smtcWindows}) {
-    smtcWindows.buttonPressStream.listen((event) {
+    buttonPressStream = smtcWindows.buttonPressStream.listen((event) {
       switch (event) {
         case PressedButton.play:
           setPlayerState(PlayerState.playing);
@@ -160,6 +163,7 @@ class BottomMusicPlayerProvider with ChangeNotifier {
     musicListNotifier.value.clear();
     setPlayerState(PlayerState.paused);
     currentMusicIndex = -1;
+    smtcWindows.setPlaybackStatus(PlaybackStatus.stopped);
     player.release();
   }
 
@@ -236,6 +240,7 @@ class BottomMusicPlayerProvider with ChangeNotifier {
     playerStateNotifier.dispose();
     playerModeNotifier.dispose();
     songDurationNotifier.dispose();
+    buttonPressStream.cancel();
     super.dispose();
   }
 
