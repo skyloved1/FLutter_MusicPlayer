@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:fluent_ui/fluent_ui.dart';
@@ -8,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:smtc_windows/smtc_windows.dart';
 
 import '../../globalVariable.dart';
+import '../../ncmDecrypt/netEaseCryptBinary.dart';
 import '../../provider/bottomMusicPlayerProvider.dart';
 import 'musicList.dart';
 
@@ -97,6 +100,42 @@ class Right extends StatelessWidget {
               },
               icon: Icon(
                 MyIcon.add,
+                size: 24,
+              ),
+            ),
+          ),
+          Tooltip(
+            message: "添加音乐到播放列表",
+            useMousePosition: true,
+            triggerMode: TooltipTriggerMode.manual,
+            //TODO 尝试添加动画效果
+            //TODO 添加选择文件夹并搜索文件夹内的音乐文件
+            child: IconButton(
+              key: ValueKey('add_music_button_ncm'),
+              onPressed: () async {
+                var file = await openFile(acceptedTypeGroups: [
+                  XTypeGroup(label: 'audio', extensions: ['ncm'])
+                ]);
+                if (file != null) {
+                  //TODO 添加ncm文件解析
+                  // Create an instance of NeteaseCrypt
+                  NeteaseCrypt neteaseCrypt = NeteaseCrypt(file.path);
+
+                  // Get the decrypted binary data
+                  Uint8List? decryptedData = neteaseCrypt.decryptedData;
+
+                  String name = file.name.split('\\').last;
+                  print("name:$name");
+                  Provider.of<BottomMusicPlayerProvider>(context, listen: false)
+                      .addMusic(MusicInfo(
+                          musicName: name,
+                          source: DeviceFileSource(file.path),
+                          musicBytes: decryptedData,
+                          sourceType: SourceType.bytes));
+                }
+              },
+              icon: Icon(
+                FluentIcons.add_bookmark,
                 size: 24,
               ),
             ),

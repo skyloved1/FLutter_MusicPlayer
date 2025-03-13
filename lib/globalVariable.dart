@@ -25,14 +25,17 @@ class MusicInfo {
   String? musicArtist;
   String? musicAvatar;
   String? musicAlbum;
+  Uint8List? musicBytes;
 
-  MusicInfo(
-      {required this.source,
-      required this.sourceType,
-      this.musicName,
-      this.musicArtist,
-      this.musicAvatar,
-      this.musicAlbum}) {
+  MusicInfo({
+    required this.source,
+    required this.sourceType,
+    this.musicName,
+    this.musicArtist,
+    this.musicAvatar,
+    this.musicAlbum,
+    this.musicBytes,
+  }) {
     musicName ??= caculateMusicName(source_: source, sourceType_: sourceType);
     // if (musicAvatar == null) {
     //   tryToSetMusicAvatarWithDeviceFileSource(musicInfo: this);
