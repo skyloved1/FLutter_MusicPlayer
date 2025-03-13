@@ -2,6 +2,8 @@ import 'dart:typed_data';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/services.dart';
+import 'package:smtc_windows/smtc_windows.dart';
 
 import '../globalVariable.dart';
 
@@ -20,9 +22,43 @@ class BottomMusicPlayerProvider with ChangeNotifier {
   late final ValueNotifier<List<MusicInfo>> musicListNotifier;
 
   late final AudioPlayer player;
+  late final SMTCWindows smtcWindows;
 
   BottomMusicPlayerProvider(
-      {required this.player, required this.musicListNotifier});
+      {required this.player,
+      required this.musicListNotifier,
+      required this.smtcWindows}) {
+    smtcWindows.buttonPressStream.listen((event) {
+      switch (event) {
+        case PressedButton.play:
+          setPlayerState(PlayerState.playing);
+        case PressedButton.pause:
+          setPlayerState(PlayerState.paused);
+        case PressedButton.next:
+          playNext();
+        case PressedButton.previous:
+          playPrevious();
+        case PressedButton.fastForward:
+          // TODO: Handle this case.
+          throw UnimplementedError();
+        case PressedButton.rewind:
+          // TODO: Handle this case.
+          throw UnimplementedError();
+        case PressedButton.stop:
+          // TODO: Handle this case.
+          throw UnimplementedError();
+        case PressedButton.record:
+          // TODO: Handle this case.
+          throw UnimplementedError();
+        case PressedButton.channelUp:
+          // TODO: Handle this case.
+          throw UnimplementedError();
+        case PressedButton.channelDown:
+          // TODO: Handle this case.
+          throw UnimplementedError();
+      }
+    });
+  }
 
   get sourceType => _sourceType;
 
@@ -70,6 +106,7 @@ class BottomMusicPlayerProvider with ChangeNotifier {
       }
       var duration = await player.getDuration();
       setSongDuration(duration ?? Duration.zero);
+      smtcWindows.setEndTime(duration ?? Duration.zero);
       player.resume();
       setPlayerState(PlayerState.playing);
     } catch (e) {
@@ -82,18 +119,23 @@ class BottomMusicPlayerProvider with ChangeNotifier {
     switch (value) {
       case PlayerState.playing:
         player.resume();
+        smtcWindows.setPlaybackStatus(PlaybackStatus.playing);
         break;
       case PlayerState.paused:
         player.pause();
+        smtcWindows.setPlaybackStatus(PlaybackStatus.paused);
         break;
       case PlayerState.stopped:
         player.stop();
+        smtcWindows.setPlaybackStatus(PlaybackStatus.stopped);
         break;
       case PlayerState.completed:
         player.stop();
+        smtcWindows.setPlaybackStatus(PlaybackStatus.stopped);
         break;
       case PlayerState.disposed:
         print("Player has been disposed");
+        smtcWindows.setPlaybackStatus(PlaybackStatus.closed);
         break;
     }
   }
@@ -106,7 +148,7 @@ class BottomMusicPlayerProvider with ChangeNotifier {
     musicListNotifier.value.add(musicInfo);
     if (getCurrentMusicIndex == -1) {
       currentMusicIndex = 0;
-      musicInfo.source.setOnPlayer(player);
+      playMusicAt(getCurrentMusicIndex);
     }
   }
 
@@ -159,6 +201,14 @@ class BottomMusicPlayerProvider with ChangeNotifier {
             type: SourceType.bytes);
         break;
     }
+    smtcWindows.updateMetadata(MusicMetadata(
+        title: musicListNotifier.value[index].musicName ?? "未知歌曲",
+        artist: musicListNotifier.value[index].musicArtist ?? "未知歌手",
+        album: musicListNotifier.value[index].musicAlbum ?? "未知专辑",
+        albumArtist: musicListNotifier.value[index].musicArtist ?? "未知歌手",
+        thumbnail: musicListNotifier.value[index].musicAvatar ??
+            //TODO 应当替换成本地文件的绝对路径
+            "https://p1.music.126.net/0ju8ET1ApZSXfWacc4w49w==/109951169484091680.jpg?param=130y130"));
   }
 
   void playNext() {

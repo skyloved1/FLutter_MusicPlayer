@@ -5,6 +5,7 @@ import 'package:flutter/material.dart' as material;
 import 'package:netease_cloud_music/Icon/Icon.dart';
 import 'package:netease_cloud_music/subView/bottom/bottomProgressIndicator.dart';
 import 'package:provider/provider.dart';
+import 'package:smtc_windows/smtc_windows.dart';
 
 import '../../globalVariable.dart';
 import '../../provider/bottomMusicPlayerProvider.dart';
@@ -43,7 +44,10 @@ class BottomMusicPlayerState extends State<BottomMusicPlayer>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Left(),
-          Mid(audioPlayer: context.read<BottomMusicPlayerProvider>().player),
+          Mid(
+              audioPlayer: context.read<BottomMusicPlayerProvider>().player,
+              smtcWindows:
+                  context.read<BottomMusicPlayerProvider>().smtcWindows),
           Right(),
         ],
       ),
@@ -133,9 +137,11 @@ class Mid extends StatelessWidget {
   const Mid({
     super.key,
     required this.audioPlayer,
+    required this.smtcWindows,
   });
 
   final AudioPlayer audioPlayer;
+  final SMTCWindows smtcWindows;
 
   @override
   Widget build(BuildContext context) {
@@ -267,6 +273,7 @@ class Mid extends StatelessWidget {
               width: 400,
               child: BottomProgressIndicator(
                 audioPlayer: audioPlayer,
+                smtcWindows: smtcWindows,
               ),
             ),
           ),

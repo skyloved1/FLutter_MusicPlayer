@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/services.dart';
 import 'package:netease_cloud_music/model/accountModel.dart';
+import 'package:path_provider/path_provider.dart';
 
 String apiPrefix = "http://localhost:3000";
 UserModel? userModel;
@@ -87,4 +91,24 @@ class MusicInfo {
       musicInfo.musicAvatar = musicAvatar.path;
     }
   }
+}
+
+Future<String> getAssetAbsolutePath(String assetName) async {
+  // 获取临时目录
+  final directory = await getTemporaryDirectory();
+  final filePath = '${directory.path}/$assetName';
+
+  // 检查文件是否已存在
+  if (File(filePath).existsSync()) {
+    return filePath;
+  }
+
+  // 从资产中读取文件并写入临时目录
+  final byteData = await rootBundle.load('assets/$assetName');
+  final buffer = byteData.buffer;
+  await File(filePath).writeAsBytes(
+    buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+  );
+
+  return filePath;
 }

@@ -88,7 +88,10 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => BottomMusicPlayerProvider(
-          player: player, musicListNotifier: musicListNotifier),
+        player: player,
+        musicListNotifier: musicListNotifier,
+        smtcWindows: smtc,
+      ),
       child: FluentApp(
         locale: const Locale("zh", "CN"),
         theme: FluentThemeData(

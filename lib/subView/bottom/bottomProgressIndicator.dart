@@ -4,11 +4,14 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:netease_cloud_music/provider/bottomMusicPlayerProvider.dart';
 import 'package:provider/provider.dart';
+import 'package:smtc_windows/smtc_windows.dart';
 
 class BottomProgressIndicator extends StatefulWidget {
-  BottomProgressIndicator({super.key, required this.audioPlayer});
+  BottomProgressIndicator(
+      {super.key, required this.audioPlayer, required this.smtcWindows});
 
   final AudioPlayer audioPlayer;
+  final SMTCWindows smtcWindows;
 
   final DisPlaySongDuration songDuration = DisPlaySongDuration();
 
@@ -27,6 +30,7 @@ class _BottomProgressIndicatorState extends State<BottomProgressIndicator> {
     positionSubscription = widget.audioPlayer.onPositionChanged.listen((event) {
       setState(() {
         currentPos = event;
+        widget.smtcWindows.setPosition(event);
       });
     });
   }
