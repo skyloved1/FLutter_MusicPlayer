@@ -10,6 +10,7 @@ import 'package:window_manager/window_manager.dart';
 
 import 'globalVariable.dart';
 
+//TODO smtc BUG 当点击控制中心的按钮后会导致smtc与音频识别壁纸无法更新
 void main() async {
   if (!Platform.isWindows) {
     throw UnsupportedError('This platform is only supported on Windows');

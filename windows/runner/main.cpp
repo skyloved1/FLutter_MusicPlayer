@@ -1,12 +1,45 @@
 #include <flutter/dart_project.h>
 #include <flutter/flutter_view_controller.h>
 #include <windows.h>
-
 #include "flutter_window.h"
 #include "utils.h"
 
+// 全局变量，用于存储窗口类名
+const wchar_t gszClassName[] = L"netease_cloud_music";
+
+// 检查是否已经有一个实例在运行
+BOOL IsAlreadyRunning() {
+  HANDLE hMutex = CreateMutex(NULL, TRUE, L"UniqueMutexName");
+  if (GetLastError() == ERROR_ALREADY_EXISTS) {
+    // 如果互斥锁已存在，则释放它并返回TRUE
+    CloseHandle(hMutex);
+    return TRUE;
+  }
+  return FALSE;
+}
+
+// 将已有窗口带到前台并聚焦
+void BringExistingWindowToFront() {
+    HWND hwnd = FindWindow(gszClassName, NULL); // 使用类名查找窗口
+    if (hwnd) {
+        if (IsIconic(hwnd)) {
+            ShowWindow(hwnd, SW_RESTORE); // 如果窗口最小化，则恢复
+        }
+        SetForegroundWindow(hwnd); // 将窗口带到前台
+        SetFocus(hwnd); // 设置焦点
+    }
+}
+
+
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
                       _In_ wchar_t *command_line, _In_ int show_command) {
+  // 检查是否已经有一个实例在运行
+  if (IsAlreadyRunning()) {
+    // 如果已有实例在运行，将窗口带到前台
+    BringExistingWindowToFront();
+    return EXIT_FAILURE;
+  }
+
   // Attach to console when present (e.g., 'flutter run') or create a
   // new console when running with a debugger.
   if (!::AttachConsole(ATTACH_PARENT_PROCESS) && ::IsDebuggerPresent()) {
@@ -27,7 +60,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   FlutterWindow window(project);
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
-  if (!window.Create(L"netease_cloud_music", origin, size)) {
+  if (!window.Create(gszClassName, origin, size)) {
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);
