@@ -11,7 +11,7 @@ typedef DecryptFileDart = void Function(
 
 // Load DLL
 final DynamicLibrary libncmdump = Platform.isWindows
-    ? DynamicLibrary.open('assets/dll/libncmdump.dll')
+    ? DynamicLibrary.open('data/flutter_assets/assets/dll/libncmdump.dll')
     : DynamicLibrary.process();
 
 // Get function pointer
