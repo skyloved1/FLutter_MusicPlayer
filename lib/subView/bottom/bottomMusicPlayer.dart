@@ -1,16 +1,18 @@
-import 'dart:typed_data';
+import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:ffi/ffi.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:netease_cloud_music/Icon/Icon.dart';
 import 'package:netease_cloud_music/subView/bottom/bottomProgressIndicator.dart';
+import 'package:path/path.dart' as path;
 import 'package:provider/provider.dart';
 import 'package:smtc_windows/smtc_windows.dart';
 
 import '../../globalVariable.dart';
-import '../../ncmDecrypt/netEaseCryptBinary.dart';
+import '../../ncmDecrypt/libncmdump_ffi.dart';
 import '../../provider/bottomMusicPlayerProvider.dart';
 import 'musicList.dart';
 
@@ -117,21 +119,39 @@ class Right extends StatelessWidget {
                   XTypeGroup(label: 'audio', extensions: ['ncm'])
                 ]);
                 if (file != null) {
-                  //TODO 添加ncm文件解析
-                  // Create an instance of NeteaseCrypt
-                  NeteaseCrypt neteaseCrypt = NeteaseCrypt(file.path);
+                  final inputPath = file.path.toNativeUtf8();
+                  final outputDir = path.dirname(file.path).toNativeUtf8();
 
-                  // Get the decrypted binary data
-                  Uint8List? decryptedData = neteaseCrypt.decryptedData;
+                  decryptFile(inputPath, outputDir);
 
+                  malloc.free(inputPath);
+                  malloc.free(outputDir);
+
+                  // Check for the existence of the output files
+                  final outputFileNameWithoutExtension =
+                      path.basenameWithoutExtension(file.path);
+                  final outputPathMp3 = path.join(path.dirname(file.path),
+                      '$outputFileNameWithoutExtension.mp3');
+                  final outputPathFlac = path.join(path.dirname(file.path),
+                      '$outputFileNameWithoutExtension.flac');
+
+                  if (File(outputPathMp3).existsSync()) {
+                    print('Decrypted to MP3 successfully');
+                  } else if (File(outputPathFlac).existsSync()) {
+                    print('Decrypted to FLAC successfully');
+                  } else {
+                    print('Decryption failed');
+                  }
                   String name = file.name.split('\\').last;
                   print("name:$name");
                   Provider.of<BottomMusicPlayerProvider>(context, listen: false)
                       .addMusic(MusicInfo(
                           musicName: name,
-                          source: DeviceFileSource(file.path),
-                          musicBytes: decryptedData,
-                          sourceType: SourceType.bytes));
+                          source: DeviceFileSource(
+                              File(outputPathFlac).existsSync()
+                                  ? outputPathFlac
+                                  : outputPathMp3),
+                          sourceType: SourceType.file));
                 }
               },
               icon: Icon(
@@ -472,15 +492,19 @@ class _LeftState extends State<Left> with SingleTickerProviderStateMixin {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            provider.musicListNotifier.value.isNotEmpty
-                                ? provider
-                                        .musicListNotifier
-                                        .value[provider.getCurrentMusicIndex]
-                                        .musicName ??
-                                    '未知歌曲名'
-                                : "未知歌曲名",
-                            style: FluentTheme.of(context).typography.subtitle,
+                          //TODO 当歌曲名过长时 添加歌曲名和歌手名的滚动效果
+                          FittedBox(
+                            child: Text(
+                              provider.musicListNotifier.value.isNotEmpty
+                                  ? provider
+                                          .musicListNotifier
+                                          .value[provider.getCurrentMusicIndex]
+                                          .musicName ??
+                                      '未知歌曲名'
+                                  : "未知歌曲名",
+                              style:
+                                  FluentTheme.of(context).typography.subtitle,
+                            ),
                           ),
                           Text(
                             provider.musicListNotifier.value.isNotEmpty
