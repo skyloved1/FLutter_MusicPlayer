@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:audio_metadata_reader/audio_metadata_reader.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:ffi/ffi.dart';
 import 'package:file_selector/file_selector.dart';
@@ -123,34 +124,24 @@ class Right extends StatelessWidget {
                   final outputDir = path.dirname(file.path).toNativeUtf8();
 
                   decryptFile(inputPath, outputDir);
-
                   malloc.free(inputPath);
                   malloc.free(outputDir);
 
-                  // Check for the existence of the output files
-                  final outputFileNameWithoutExtension =
-                      path.basenameWithoutExtension(file.path);
-                  final outputPathMp3 = path.join(path.dirname(file.path),
-                      '$outputFileNameWithoutExtension.mp3');
-                  final outputPathFlac = path.join(path.dirname(file.path),
-                      '$outputFileNameWithoutExtension.flac');
-
-                  if (File(outputPathMp3).existsSync()) {
-                    print('Decrypted to MP3 successfully');
-                  } else if (File(outputPathFlac).existsSync()) {
-                    print('Decrypted to FLAC successfully');
-                  } else {
-                    print('Decryption failed');
-                  }
+                  String dir = path.dirname(file.path);
+                  String outputFilePath = isMp3OrFlac(
+                      dir: dir,
+                      outputFileNameWithoutExtension:
+                          path.basenameWithoutExtension(file.name));
+                  var metaData =
+                      readMetadata(File('$dir\\$outputFilePath').absolute);
                   String name = file.name.split('\\').last;
                   print("name:$name");
                   Provider.of<BottomMusicPlayerProvider>(context, listen: false)
                       .addMusic(MusicInfo(
-                          musicName: name,
-                          source: DeviceFileSource(
-                              File(outputPathFlac).existsSync()
-                                  ? outputPathFlac
-                                  : outputPathMp3),
+                          musicName: metaData.title ?? name,
+                          musicArtist: metaData.artist,
+                          musicAlbum: metaData.album,
+                          source: DeviceFileSource('$dir\\$outputFilePath'),
                           sourceType: SourceType.file));
                 }
               },
@@ -189,6 +180,22 @@ class Right extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String isMp3OrFlac(
+      {required String dir, required String outputFileNameWithoutExtension}) {
+    final outputPathMp3 = path.join(dir, '$outputFileNameWithoutExtension.mp3');
+    final outputPathFlac =
+        path.join(dir, '$outputFileNameWithoutExtension.flac');
+
+    if (File(outputPathMp3).existsSync()) {
+      return "$outputFileNameWithoutExtension.mp3";
+    } else if (File(outputPathFlac).existsSync()) {
+      return "$outputFileNameWithoutExtension.flac";
+    } else {
+      //TODO 添加 displayInfoBar 来显示错误信息
+      throw "Decryption failed";
+    }
   }
 }
 
@@ -512,8 +519,8 @@ class _LeftState extends State<Left> with SingleTickerProviderStateMixin {
                                         .musicListNotifier
                                         .value[provider.getCurrentMusicIndex]
                                         .musicArtist ??
-                                    '未知歌曲名'
-                                : "未知歌曲名",
+                                    '未知歌手'
+                                : "未知歌手",
                             style: FluentTheme.of(context).typography.caption,
                           ),
                         ],

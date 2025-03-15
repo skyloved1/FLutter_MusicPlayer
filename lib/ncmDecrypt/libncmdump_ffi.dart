@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 
+//TODO 尝试修复metadata修复问题
 // Define C function signature
 typedef DecryptFileC = Void Function(
     Pointer<Utf8> inputPath, Pointer<Utf8> outputPath);
