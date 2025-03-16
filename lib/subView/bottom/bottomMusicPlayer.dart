@@ -34,8 +34,7 @@ class BottomMusicPlayer extends StatefulWidget {
   State<BottomMusicPlayer> createState() => BottomMusicPlayerState();
 }
 
-class BottomMusicPlayerState extends State<BottomMusicPlayer>
-    with AutomaticKeepAliveClientMixin {
+class BottomMusicPlayerState extends State<BottomMusicPlayer> {
   @override
   void dispose() {
     super.dispose();
@@ -43,7 +42,6 @@ class BottomMusicPlayerState extends State<BottomMusicPlayer>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     return ColoredBox(
       color: Color.fromRGBO(45, 45, 56, 1),
       child: Row(
@@ -60,9 +58,6 @@ class BottomMusicPlayerState extends State<BottomMusicPlayer>
       ),
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
 
 class Right extends StatelessWidget {
@@ -92,26 +87,10 @@ class Right extends StatelessWidget {
                 ]);
 
                 for (XFile f in files) {
-                  String fileName = f.name;
-                  if (f.name.endsWith(".ncm")) {
-                    cryptFile(file: f);
-                    fileName = isMp3OrFlac(
-                        dir: path.dirname(f.path),
-                        outputFileNameWithoutExtension:
-                            path.basenameWithoutExtension(f.name));
-                  }
-                  var dir = path.dirname(f.path);
-
-                  var metaData = readMetadata(File('$dir\\$fileName').absolute);
+                  MusicInfo musicInfo =
+                      await compute(processFile, FileProcessingData(f));
                   Provider.of<BottomMusicPlayerProvider>(context, listen: false)
-                      .addMusic(MusicInfo(
-                          musicName: metaData.title ?? f.name,
-                          musicArtist: metaData.artist,
-                          musicAlbum: metaData.album,
-                          musicAvatar: tryGetMusicAvatarWithDeviceFileSource(
-                              metaData: metaData),
-                          source: DeviceFileSource('$dir\\$fileName'),
-                          sourceType: SourceType.file));
+                      .addMusic(musicInfo);
                 }
               },
               icon: Icon(
@@ -166,6 +145,27 @@ class Right extends StatelessWidget {
     return musicAvatar;
   }
 
+  Future<MusicInfo> processFile(FileProcessingData data) async {
+    String fileName = data.file.name;
+    if (data.file.name.endsWith(".ncm")) {
+      cryptFile(file: data.file);
+      fileName = isMp3OrFlac(
+          dir: path.dirname(data.file.path),
+          outputFileNameWithoutExtension:
+              path.basenameWithoutExtension(data.file.name));
+    }
+    var dir = path.dirname(data.file.path);
+
+    var metaData = readMetadata(File('$dir\\$fileName').absolute);
+    return MusicInfo(
+        musicName: metaData.title ?? data.file.name,
+        musicArtist: metaData.artist ?? data.file.name,
+        musicAlbum: metaData.album,
+        musicAvatar: tryGetMusicAvatarWithDeviceFileSource(metaData: metaData),
+        source: DeviceFileSource('$dir\\$fileName'),
+        sourceType: SourceType.file);
+  }
+
   /// Decrypt the file
   /// 默认解密后的文件会保存在原文件所在的文件夹中
   void cryptFile({required XFile file, String? outputDir}) {
@@ -192,6 +192,12 @@ class Right extends StatelessWidget {
       throw "Decryption failed";
     }
   }
+}
+
+class FileProcessingData {
+  final XFile file;
+
+  FileProcessingData(this.file);
 }
 
 class Mid extends StatelessWidget {

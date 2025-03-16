@@ -153,10 +153,12 @@ class BottomMusicPlayerProvider with ChangeNotifier {
       currentMusicIndex = 0;
       playMusicAt(getCurrentMusicIndex);
     }
+    musicListNotifier.notifyListeners();
   }
 
   void removeMusicWhere(bool Function(MusicInfo) callback) {
     musicListNotifier.value.removeWhere(callback);
+    musicListNotifier.notifyListeners();
   }
 
   void clearMusicList() {
@@ -165,6 +167,7 @@ class BottomMusicPlayerProvider with ChangeNotifier {
     currentMusicIndex = -1;
     smtcWindows.setPlaybackStatus(PlaybackStatus.stopped);
     player.release();
+    musicListNotifier.notifyListeners();
   }
 
   void removeMusicAt(int index) {
@@ -175,10 +178,12 @@ class BottomMusicPlayerProvider with ChangeNotifier {
       player.release();
       currentMusicIndex = getCurrentMusicIndex - 1;
     }
+    musicListNotifier.notifyListeners();
   }
 
   void insertMusic(int index, MusicInfo musicInfo) {
     musicListNotifier.value.insert(index, musicInfo);
+    musicListNotifier.notifyListeners();
   }
 
   void playMusicAt(int index) {

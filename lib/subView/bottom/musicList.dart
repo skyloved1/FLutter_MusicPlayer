@@ -8,12 +8,17 @@ import 'package:window_manager/window_manager.dart';
 
 import '../../provider/bottomMusicPlayerProvider.dart';
 
-class MusicList extends StatelessWidget {
-  MusicList({
+class MusicList extends StatefulWidget {
+  const MusicList({
     super.key,
   });
 
-  final GlobalKey<SliverAnimatedListState> listKey =
+  @override
+  State<MusicList> createState() => _MusicListState();
+}
+
+class _MusicListState extends State<MusicList> {
+  GlobalKey<SliverAnimatedListState> listKey =
       GlobalKey<SliverAnimatedListState>();
 
   @override
@@ -22,7 +27,7 @@ class MusicList extends StatelessWidget {
     print(
         "重建后的列表长度为${Provider.of<BottomMusicPlayerProvider>(context, listen: false).musicListNotifier.value.length}");
     final musicListNotifier =
-        Provider.of<BottomMusicPlayerProvider>(context, listen: true)
+        Provider.of<BottomMusicPlayerProvider>(context, listen: false)
             .musicListNotifier;
     return Stack(
       children: [
@@ -51,6 +56,8 @@ class MusicList extends StatelessWidget {
                   child: CustomScrollView(
                     slivers: [
                       material.SliverAppBar(
+                        surfaceTintColor: Colors.transparent,
+                        pinned: true,
                         backgroundColor: Color.fromRGBO(45, 45, 56, 1),
                         leading: IconButton(
                             icon: Icon(FluentIcons.chrome_back_mirrored),
@@ -85,14 +92,24 @@ class MusicList extends StatelessWidget {
                           )
                         ],
                       ),
-                      SliverAnimatedList(
-                        key: listKey,
-                        initialItemCount: musicListNotifier.value.length,
-                        itemBuilder: (context, index, animation) {
-                          return MusicListTile(
-                            musicListNotifier: musicListNotifier,
-                            listKey: listKey,
-                            index: index,
+                      ValueListenableBuilder<List<MusicInfo>>(
+                        valueListenable: Provider.of<BottomMusicPlayerProvider>(
+                                context,
+                                listen: true)
+                            .musicListNotifier,
+                        builder: (BuildContext context, value, Widget? child) {
+                          listKey = GlobalKey<
+                              SliverAnimatedListState>(); // Create a new key
+                          return SliverAnimatedList(
+                            key: listKey,
+                            initialItemCount: value.length,
+                            itemBuilder: (context, index, animation) {
+                              return MusicListTile(
+                                musicListNotifier: musicListNotifier,
+                                listKey: listKey,
+                                index: index,
+                              );
+                            },
                           );
                         },
                       ),
@@ -159,7 +176,7 @@ class MusicListTileChild extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 75,
       child: ListTile(
         tileColor:
@@ -170,17 +187,21 @@ class MusicListTileChild extends StatelessWidget {
                     Colors.grey[120].withAlpha(255 ~/ 2))
                 : null,
         leading: FittedBox(
-              child: musicAvatar,
-              fit: BoxFit.contain,
-            ) ??
-            Icon(FluentIcons.music_note),
-        title: Text(widget.musicListNotifier.value.isEmpty
-            ? "未知歌曲"
-            : widget.musicListNotifier.value[widget.index].musicName ?? "未知歌曲"),
-        subtitle: Text(widget.musicListNotifier.value.isEmpty
-            ? "未知歌曲"
-            : widget.musicListNotifier.value[widget.index].musicArtist ??
-                "未知歌手"),
+          child: musicAvatar,
+          fit: BoxFit.contain,
+        ),
+        title: FittedBox(
+          child: Text(widget.musicListNotifier.value.isEmpty
+              ? "未知歌曲"
+              : widget.musicListNotifier.value[widget.index].musicName ??
+                  "未知歌曲"),
+        ),
+        subtitle: FittedBox(
+          child: Text(widget.musicListNotifier.value.isEmpty
+              ? "未知歌曲"
+              : widget.musicListNotifier.value[widget.index].musicArtist ??
+                  "未知歌手"),
+        ),
         onPressed: () {
           Provider.of<BottomMusicPlayerProvider>(context, listen: false)
             ..currentMusicIndexNotifier.value = widget.index
