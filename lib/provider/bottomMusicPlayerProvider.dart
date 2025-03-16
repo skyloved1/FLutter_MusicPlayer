@@ -148,6 +148,7 @@ class BottomMusicPlayerProvider with ChangeNotifier {
   }
 
   void addMusic(MusicInfo musicInfo) {
+    //TODO: 应当获取AnimatedSliverList的Key，当音乐添加时，插入新的音乐
     musicListNotifier.value.add(musicInfo);
     if (getCurrentMusicIndex == -1) {
       currentMusicIndex = 0;

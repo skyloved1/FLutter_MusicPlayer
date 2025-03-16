@@ -84,14 +84,16 @@ class Right extends StatelessWidget {
               onPressed: () async {
                 List<XFile> files = await openFiles(acceptedTypeGroups: [
                   XTypeGroup(
-                      label: 'audio', extensions: ['ncm,mp3,m4a,flac,wav'])
+                      label: 'audio',
+                      extensions: ['ncm', "mp3", "m4a", "flac", "wav"])
                 ]);
 
                 for (XFile f in files) {
-                  MusicInfo musicInfo =
-                      await compute(processFile, FileProcessingData(f));
-                  Provider.of<BottomMusicPlayerProvider>(context, listen: false)
-                      .addMusic(musicInfo);
+                  compute(processFile, f).then((musicInfo) {
+                    Provider.of<BottomMusicPlayerProvider>(context,
+                            listen: false)
+                        .addMusic(musicInfo);
+                  });
                 }
               },
               icon: Icon(
@@ -146,21 +148,21 @@ class Right extends StatelessWidget {
     return musicAvatar;
   }
 
-  Future<MusicInfo> processFile(FileProcessingData data) async {
-    String fileName = data.file.name;
-    if (data.file.name.endsWith(".ncm")) {
-      cryptFile(file: data.file);
+  Future<MusicInfo> processFile(XFile file) async {
+    String fileName = file.name;
+    if (file.name.endsWith(".ncm")) {
+      cryptFile(file: file);
       fileName = isMp3OrFlac(
-          dir: path.dirname(data.file.path),
+          dir: path.dirname(file.path),
           outputFileNameWithoutExtension:
-              path.basenameWithoutExtension(data.file.name));
+              path.basenameWithoutExtension(file.name));
     }
-    var dir = path.dirname(data.file.path);
+    var dir = path.dirname(file.path);
 
     var metaData = readMetadata(File('$dir\\$fileName').absolute);
     return MusicInfo(
-        musicName: metaData.title ?? data.file.name,
-        musicArtist: metaData.artist ?? data.file.name,
+        musicName: metaData.title ?? file.name,
+        musicArtist: metaData.artist ?? file.name,
         musicAlbum: metaData.album,
         musicAvatar: tryGetMusicAvatarWithDeviceFileSource(metaData: metaData),
         source: DeviceFileSource('$dir\\$fileName'),
@@ -193,12 +195,6 @@ class Right extends StatelessWidget {
       throw "Decryption failed";
     }
   }
-}
-
-class FileProcessingData {
-  final XFile file;
-
-  FileProcessingData(this.file);
 }
 
 class Mid extends StatelessWidget {
