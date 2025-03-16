@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:netease_cloud_music/model/accountModel.dart';
 import 'package:path_provider/path_provider.dart';
@@ -23,7 +24,7 @@ class MusicInfo {
   SourceType sourceType;
   String? musicName;
   String? musicArtist;
-  String? musicAvatar;
+  Image? musicAvatar;
   String? musicAlbum;
 
   MusicInfo({
@@ -64,33 +65,6 @@ class MusicInfo {
         break;
     }
     return musicName;
-  }
-
-  static void tryToSetMusicAvatarWithDeviceFileSource(
-      {required MusicInfo musicInfo}) async {
-    if (musicInfo.sourceType == SourceType.file) {
-      final DeviceFileSource deviceFileSource =
-          musicInfo.source as DeviceFileSource;
-      final String path = deviceFileSource.path;
-      //找寻与文件名相同的图片
-      var fileName = path.split("/").last.split(".").first;
-      DeviceFileSource? musicAvatar;
-      try {
-        musicAvatar ??=
-            DeviceFileSource("assets/images/musicAvatar/$fileName.jpg");
-      } catch (e) {
-        print(e);
-        try {
-          musicAvatar ??=
-              DeviceFileSource("assets/images/musicAvatar/$fileName.jpeg");
-        } catch (e) {
-          print(e);
-          musicAvatar ??=
-              DeviceFileSource("assets/images/musicAvatar/$fileName.webp");
-        }
-      }
-      musicInfo.musicAvatar = musicAvatar.path;
-    }
   }
 }
 

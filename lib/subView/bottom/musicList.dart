@@ -131,10 +131,8 @@ class _MusicListTileState extends State<MusicListTile> {
     var currentIndexValueNotifier =
         Provider.of<BottomMusicPlayerProvider>(context, listen: true)
             .currentMusicIndexNotifier;
-    if (widget.musicListNotifier.value[widget.index].musicAvatar != null) {
-      musicAvatar = Image.network(
-          widget.musicListNotifier.value[widget.index].musicAvatar!);
-    }
+    musicAvatar = widget.musicListNotifier.value[widget.index].musicAvatar;
+
     return ValueListenableBuilder<int>(
       valueListenable: currentIndexValueNotifier,
       builder: (BuildContext context, value, Widget? child) {
@@ -161,60 +159,71 @@ class MusicListTileChild extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      tileColor: Provider.of<BottomMusicPlayerProvider>(context, listen: false)
-                  .getCurrentMusicIndex ==
-              widget.index
-          ? WidgetStatePropertyAll<Color>(Colors.grey[120].withAlpha(255 ~/ 2))
-          : null,
-      leading: musicAvatar ?? Icon(FluentIcons.music_note),
-      title: Text(widget.musicListNotifier.value.isEmpty
-          ? "未知歌曲"
-          : widget.musicListNotifier.value[widget.index].musicName ?? "未知歌曲"),
-      subtitle: Text(widget.musicListNotifier.value.isEmpty
-          ? "未知歌曲"
-          : widget.musicListNotifier.value[widget.index].musicArtist ?? "未知歌手"),
-      onPressed: () {
-        Provider.of<BottomMusicPlayerProvider>(context, listen: false)
-          ..currentMusicIndexNotifier.value = widget.index
-          ..playMusicAt(widget.index);
-      },
-      trailing: IconButton(
-        icon: Icon(
-          FluentIcons.delete,
-          size: 24,
-        ),
+    return Container(
+      height: 75,
+      child: ListTile(
+        tileColor:
+            Provider.of<BottomMusicPlayerProvider>(context, listen: false)
+                        .getCurrentMusicIndex ==
+                    widget.index
+                ? WidgetStatePropertyAll<Color>(
+                    Colors.grey[120].withAlpha(255 ~/ 2))
+                : null,
+        leading: FittedBox(
+              child: musicAvatar,
+              fit: BoxFit.contain,
+            ) ??
+            Icon(FluentIcons.music_note),
+        title: Text(widget.musicListNotifier.value.isEmpty
+            ? "未知歌曲"
+            : widget.musicListNotifier.value[widget.index].musicName ?? "未知歌曲"),
+        subtitle: Text(widget.musicListNotifier.value.isEmpty
+            ? "未知歌曲"
+            : widget.musicListNotifier.value[widget.index].musicArtist ??
+                "未知歌手"),
         onPressed: () {
-          final provider =
-              Provider.of<BottomMusicPlayerProvider>(context, listen: false);
-          final musicInfo = widget.musicListNotifier.value[widget.index];
-
-          widget.listKey.currentState?.removeItem(
-            widget.index,
-            (context, animation) {
-              var offset = Tween<Offset>(begin: Offset(1, 0), end: Offset(0, 0))
-                  .chain(CurveTween(curve: Curves.decelerate))
-                  .animate(animation);
-              return SlideTransition(
-                position: offset,
-                child: ListTile(
-                  leading: musicAvatar ?? Icon(FluentIcons.music_note),
-                  title: Text(
-                      widget.musicListNotifier.value[widget.index].musicName ??
-                          "未知歌曲"),
-                  subtitle: Text(widget
-                          .musicListNotifier.value[widget.index].musicArtist ??
-                      "未知歌手"),
-                ),
-              );
-            },
-            duration: Duration(milliseconds: 250),
-          );
-
-          Future.delayed(Duration(milliseconds: 50), () {
-            provider.removeMusicAt(widget.index);
-          });
+          Provider.of<BottomMusicPlayerProvider>(context, listen: false)
+            ..currentMusicIndexNotifier.value = widget.index
+            ..playMusicAt(widget.index);
         },
+        trailing: IconButton(
+          icon: Icon(
+            FluentIcons.delete,
+            size: 24,
+          ),
+          onPressed: () {
+            final provider =
+                Provider.of<BottomMusicPlayerProvider>(context, listen: false);
+            final musicInfo = widget.musicListNotifier.value[widget.index];
+
+            widget.listKey.currentState?.removeItem(
+              widget.index,
+              (context, animation) {
+                var offset =
+                    Tween<Offset>(begin: Offset(1, 0), end: Offset(0, 0))
+                        .chain(CurveTween(curve: Curves.decelerate))
+                        .animate(animation);
+                return SlideTransition(
+                  position: offset,
+                  child: ListTile(
+                    leading: musicAvatar ?? Icon(FluentIcons.music_note),
+                    title: Text(widget
+                            .musicListNotifier.value[widget.index].musicName ??
+                        "未知歌曲"),
+                    subtitle: Text(widget.musicListNotifier.value[widget.index]
+                            .musicArtist ??
+                        "未知歌手"),
+                  ),
+                );
+              },
+              duration: Duration(milliseconds: 250),
+            );
+
+            Future.delayed(Duration(milliseconds: 50), () {
+              provider.removeMusicAt(widget.index);
+            });
+          },
+        ),
       ),
     );
   }

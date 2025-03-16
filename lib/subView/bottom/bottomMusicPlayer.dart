@@ -5,6 +5,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:ffi/ffi.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:netease_cloud_music/Icon/Icon.dart';
 import 'package:netease_cloud_music/subView/bottom/bottomProgressIndicator.dart';
@@ -84,69 +85,37 @@ class Right extends StatelessWidget {
             //TODO 尝试添加动画效果
             //TODO 添加选择文件夹并搜索文件夹内的音乐文件
             child: IconButton(
-              key: ValueKey('add_music_button'),
+              key: ValueKey('add_music_button_ncm'),
               onPressed: () async {
-                var file = await openFile(acceptedTypeGroups: [
-                  XTypeGroup(
-                      label: 'audio',
-                      extensions: ['mp3', 'wav', 'flac', 'm4a', 'aac'])
+                List<XFile> files = await openFiles(acceptedTypeGroups: [
+                  XTypeGroup(label: 'audio', extensions: ['ncm'])
                 ]);
-                if (file != null) {
-                  String name = file.name.split('\\').last;
-                  print("name:$name");
+
+                for (XFile f in files) {
+                  String fileName = f.name;
+                  if (f.name.endsWith(".ncm")) {
+                    cryptFile(file: f);
+                    fileName = isMp3OrFlac(
+                        dir: path.dirname(f.path),
+                        outputFileNameWithoutExtension:
+                            path.basenameWithoutExtension(f.name));
+                  }
+                  var dir = path.dirname(f.path);
+
+                  var metaData = readMetadata(File('$dir\\$fileName').absolute);
                   Provider.of<BottomMusicPlayerProvider>(context, listen: false)
                       .addMusic(MusicInfo(
-                          musicName: name,
-                          source: DeviceFileSource(file.path),
+                          musicName: metaData.title ?? f.name,
+                          musicArtist: metaData.artist,
+                          musicAlbum: metaData.album,
+                          musicAvatar: tryGetMusicAvatarWithDeviceFileSource(
+                              metaData: metaData),
+                          source: DeviceFileSource('$dir\\$fileName'),
                           sourceType: SourceType.file));
                 }
               },
               icon: Icon(
                 MyIcon.add,
-                size: 24,
-              ),
-            ),
-          ),
-          Tooltip(
-            message: "添加音乐到播放列表",
-            useMousePosition: true,
-            triggerMode: TooltipTriggerMode.manual,
-            //TODO 尝试添加动画效果
-            //TODO 添加选择文件夹并搜索文件夹内的音乐文件
-            child: IconButton(
-              key: ValueKey('add_music_button_ncm'),
-              onPressed: () async {
-                var file = await openFile(acceptedTypeGroups: [
-                  XTypeGroup(label: 'audio', extensions: ['ncm'])
-                ]);
-                if (file != null) {
-                  final inputPath = file.path.toNativeUtf8();
-                  final outputDir = path.dirname(file.path).toNativeUtf8();
-
-                  decryptFile(inputPath, outputDir);
-                  malloc.free(inputPath);
-                  malloc.free(outputDir);
-
-                  String dir = path.dirname(file.path);
-                  String outputFilePath = isMp3OrFlac(
-                      dir: dir,
-                      outputFileNameWithoutExtension:
-                          path.basenameWithoutExtension(file.name));
-                  var metaData =
-                      readMetadata(File('$dir\\$outputFilePath').absolute);
-                  String name = file.name.split('\\').last;
-                  print("name:$name");
-                  Provider.of<BottomMusicPlayerProvider>(context, listen: false)
-                      .addMusic(MusicInfo(
-                          musicName: metaData.title ?? name,
-                          musicArtist: metaData.artist,
-                          musicAlbum: metaData.album,
-                          source: DeviceFileSource('$dir\\$outputFilePath'),
-                          sourceType: SourceType.file));
-                }
-              },
-              icon: Icon(
-                FluentIcons.add_bookmark,
                 size: 24,
               ),
             ),
@@ -180,6 +149,32 @@ class Right extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Image tryGetMusicAvatarWithDeviceFileSource(
+      {required AudioMetadata metaData}) {
+    Image musicAvatar;
+
+    try {
+      musicAvatar = Image.memory(metaData.pictures.first.bytes);
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint("fail to get music form raw file :$e");
+      }
+      musicAvatar = Image.asset("assets/img/DefaultMusicAvatar.jpg");
+    }
+    return musicAvatar;
+  }
+
+  /// Decrypt the file
+  /// 默认解密后的文件会保存在原文件所在的文件夹中
+  void cryptFile({required XFile file, String? outputDir}) {
+    final inputPath = file.path.toNativeUtf8();
+    outputDir ??= path.dirname(file.path);
+    var outputDirPath = outputDir.toNativeUtf8();
+    decryptFile(inputPath, outputDirPath);
+    malloc.free(inputPath);
+    malloc.free(outputDirPath);
   }
 
   String isMp3OrFlac(
@@ -383,7 +378,7 @@ class _LeftState extends State<Left> with SingleTickerProviderStateMixin {
     if (musicList.isNotEmpty) {
       return CircleAvatar(
         backgroundImage:
-            NetworkImage(musicList[provider.getCurrentMusicIndex].musicAvatar!),
+            musicList[provider.getCurrentMusicIndex].musicAvatar?.image,
       );
     } else {
       return CircleAvatar(
@@ -462,7 +457,7 @@ class _LeftState extends State<Left> with SingleTickerProviderStateMixin {
                                                 FluentIcons.music_note),
                                           )
                                         : CircleAvatar(
-                                            backgroundImage: NetworkImage(context
+                                            backgroundImage: context
                                                 .watch<
                                                     BottomMusicPlayerProvider>()
                                                 .musicListNotifier
@@ -470,7 +465,8 @@ class _LeftState extends State<Left> with SingleTickerProviderStateMixin {
                                                     .watch<
                                                         BottomMusicPlayerProvider>()
                                                     .getCurrentMusicIndex]
-                                                .musicAvatar!),
+                                                .musicAvatar
+                                                ?.image,
                                           ),
                               ),
                             ],

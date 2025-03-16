@@ -210,7 +210,7 @@ class BottomMusicPlayerProvider with ChangeNotifier {
         artist: musicListNotifier.value[index].musicArtist ?? "未知歌手",
         album: musicListNotifier.value[index].musicAlbum ?? "未知专辑",
         albumArtist: musicListNotifier.value[index].musicArtist ?? "未知歌手",
-        thumbnail: musicListNotifier.value[index].musicAvatar ??
+        thumbnail:
             //TODO 应当替换成本地文件的绝对路径
             "https://p1.music.126.net/0ju8ET1ApZSXfWacc4w49w==/109951169484091680.jpg?param=130y130"));
   }
