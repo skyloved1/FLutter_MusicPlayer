@@ -83,7 +83,8 @@ class Right extends StatelessWidget {
               key: ValueKey('add_music_button_ncm'),
               onPressed: () async {
                 List<XFile> files = await openFiles(acceptedTypeGroups: [
-                  XTypeGroup(label: 'audio', extensions: ['ncm'])
+                  XTypeGroup(
+                      label: 'audio', extensions: ['ncm,mp3,m4a,flac,wav'])
                 ]);
 
                 for (XFile f in files) {
