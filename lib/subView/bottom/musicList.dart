@@ -8,6 +8,9 @@ import 'package:window_manager/window_manager.dart';
 
 import '../../provider/bottomMusicPlayerProvider.dart';
 
+GlobalKey<SliverAnimatedListState> listKey =
+    GlobalKey<SliverAnimatedListState>();
+
 class MusicList extends StatefulWidget {
   const MusicList({
     super.key,
@@ -18,9 +21,6 @@ class MusicList extends StatefulWidget {
 }
 
 class _MusicListState extends State<MusicList> {
-  GlobalKey<SliverAnimatedListState> listKey =
-      GlobalKey<SliverAnimatedListState>();
-
   @override
   Widget build(BuildContext context) {
     print("列表重建");
@@ -98,16 +98,24 @@ class _MusicListState extends State<MusicList> {
                                 listen: true)
                             .musicListNotifier,
                         builder: (BuildContext context, value, Widget? child) {
-                          listKey = GlobalKey<
-                              SliverAnimatedListState>(); // Create a new key
                           return SliverAnimatedList(
                             key: listKey,
                             initialItemCount: value.length,
                             itemBuilder: (context, index, animation) {
-                              return MusicListTile(
-                                musicListNotifier: musicListNotifier,
-                                listKey: listKey,
-                                index: index,
+                              var position = Tween<Offset>(
+                                      begin: Offset(0, 1), end: Offset(0, 0))
+                                  .chain(CurveTween(curve: Curves.decelerate))
+                                  .animate(animation);
+                              return SlideTransition(
+                                position: position,
+                                child: ScaleTransition(
+                                  scale: animation,
+                                  child: MusicListTile(
+                                    musicListNotifier: musicListNotifier,
+                                    listKey: listKey,
+                                    index: index,
+                                  ),
+                                ),
                               );
                             },
                           );

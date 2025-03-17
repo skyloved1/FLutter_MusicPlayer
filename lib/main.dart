@@ -88,7 +88,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => BottomMusicPlayerProvider(
+      create: (_) => BottomMusicPlayerProvider.constructor(
         player: player,
         musicListNotifier: musicListNotifier,
         smtcWindows: smtc,

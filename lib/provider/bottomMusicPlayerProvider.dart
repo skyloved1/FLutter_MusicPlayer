@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:netease_cloud_music/subView/bottom/musicList.dart';
 import 'package:smtc_windows/smtc_windows.dart';
 
 import '../globalVariable.dart';
@@ -24,10 +24,12 @@ class BottomMusicPlayerProvider with ChangeNotifier {
 
   late final AudioPlayer player;
   late final SMTCWindows smtcWindows;
-
   late final StreamSubscription<PressedButton> buttonPressStream;
+  static late BottomMusicPlayerProvider instance;
 
-  BottomMusicPlayerProvider(
+  factory BottomMusicPlayerProvider() => instance;
+
+  BottomMusicPlayerProvider.constructor(
       {required this.player,
       required this.musicListNotifier,
       required this.smtcWindows}) {
@@ -61,6 +63,7 @@ class BottomMusicPlayerProvider with ChangeNotifier {
           throw UnimplementedError();
       }
     });
+    instance = this;
   }
 
   get sourceType => _sourceType;
@@ -152,6 +155,8 @@ class BottomMusicPlayerProvider with ChangeNotifier {
   void addMusic(MusicInfo musicInfo) {
     //TODO: 应当获取AnimatedSliverList的Key，当音乐添加时，插入新的音乐
     musicListNotifier.value.add(musicInfo);
+    listKey.currentState?.insertItem(musicListNotifier.value.length - 1,
+        duration: Duration(milliseconds: 100));
     if (musicListNotifier.value.length == 1) {
       currentMusicIndex = 0;
       playMusicAt(getCurrentMusicIndex);
