@@ -134,17 +134,10 @@ class Right extends StatelessWidget {
 
   Image tryGetMusicAvatarWithDeviceFileSource(
       {required AudioMetadata metaData}) {
-    Image musicAvatar;
-
-    try {
-      musicAvatar = Image.memory(metaData.pictures.first.bytes);
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint("fail to get music form raw file :$e");
-      }
-      musicAvatar = Image.asset("assets/img/DefaultMusicAvatar.jpg");
+    if (metaData.pictures.isNotEmpty) {
+      return Image.memory(metaData.pictures.first.bytes);
     }
-    return musicAvatar;
+    return Image.asset("assets/img/DefaultMusicAvatar.jpg");
   }
 
   Future<MusicInfo> processFile(XFile file) async {
@@ -160,8 +153,18 @@ class Right extends StatelessWidget {
 
     var metaData = readMetadata(File('$dir\\$fileName').absolute);
     return MusicInfo(
-        musicName: metaData.title ?? file.name,
-        musicArtist: metaData.artist ?? file.name,
+        musicName: () {
+          if (metaData.title?.isEmpty ?? true) {
+            return fileName;
+          }
+          return metaData.title;
+        }(),
+        musicArtist: () {
+          if (metaData.artist?.isEmpty ?? true) {
+            return fileName;
+          }
+          return metaData.artist;
+        }(),
         musicAlbum: metaData.album,
         musicAvatar: tryGetMusicAvatarWithDeviceFileSource(metaData: metaData),
         source: DeviceFileSource('$dir\\$fileName'),
