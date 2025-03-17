@@ -240,7 +240,7 @@ class MusicListTileChild extends StatelessWidget {
               duration: Duration(milliseconds: 250),
             );
 
-            Future.delayed(Duration(milliseconds: 50), () {
+            Future.delayed(Duration(milliseconds: 1), () {
               provider.removeMusicAt(widget.index);
             });
           },

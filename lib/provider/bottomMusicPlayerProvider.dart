@@ -84,6 +84,8 @@ class BottomMusicPlayerProvider with ChangeNotifier {
   void setMusicSource(
       {String? value, Uint8List? bytes, type = SourceType.url}) async {
     print("Setting music source: $value");
+    //释放之前的播放资源，防止过多资源占用过多内存和Cpu
+    await player.release();
     try {
       switch (type) {
         case SourceType.url:
@@ -150,16 +152,14 @@ class BottomMusicPlayerProvider with ChangeNotifier {
   void addMusic(MusicInfo musicInfo) {
     //TODO: 应当获取AnimatedSliverList的Key，当音乐添加时，插入新的音乐
     musicListNotifier.value.add(musicInfo);
-    if (getCurrentMusicIndex == -1) {
+    if (musicListNotifier.value.length == 1) {
       currentMusicIndex = 0;
       playMusicAt(getCurrentMusicIndex);
     }
-    musicListNotifier.notifyListeners();
   }
 
   void removeMusicWhere(bool Function(MusicInfo) callback) {
     musicListNotifier.value.removeWhere(callback);
-    musicListNotifier.notifyListeners();
   }
 
   void clearMusicList() {
@@ -168,26 +168,32 @@ class BottomMusicPlayerProvider with ChangeNotifier {
     currentMusicIndex = -1;
     smtcWindows.setPlaybackStatus(PlaybackStatus.stopped);
     player.release();
-    musicListNotifier.notifyListeners();
   }
 
   void removeMusicAt(int index) {
+    print("currentMusicIndex:${getCurrentMusicIndex}");
     musicListNotifier.value.removeAt(index);
     // 如果当前播放的音乐被删除，应该停止播放
     if (index == getCurrentMusicIndex) {
-      setPlayerState(PlayerState.paused);
+      setPlayerState(PlayerState.stopped);
       player.release();
+    }
+    if (getCurrentMusicIndex >= index && getCurrentMusicIndex != 0) {
       currentMusicIndex = getCurrentMusicIndex - 1;
     }
-    musicListNotifier.notifyListeners();
+    currentMusicIndexNotifier.notifyListeners();
+    //恢复播放
+    if (getCurrentMusicIndex != -1) {
+      playMusicAt(getCurrentMusicIndex);
+    }
   }
 
   void insertMusic(int index, MusicInfo musicInfo) {
     musicListNotifier.value.insert(index, musicInfo);
-    musicListNotifier.notifyListeners();
   }
 
   void playMusicAt(int index) {
+    if (musicListNotifier.value.isEmpty) return;
     switch (musicListNotifier.value[index].sourceType) {
       case SourceType.url:
         setMusicSource(
@@ -248,13 +254,5 @@ class BottomMusicPlayerProvider with ChangeNotifier {
     songDurationNotifier.dispose();
     buttonPressStream.cancel();
     super.dispose();
-  }
-
-  void deleteMusic(int index) {
-    if (index == getCurrentMusicIndex) {
-      player.stop();
-      currentMusicIndex = -1;
-    }
-    removeMusicAt(index);
   }
 }

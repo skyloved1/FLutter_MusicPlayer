@@ -78,7 +78,6 @@ class Right extends StatelessWidget {
             useMousePosition: true,
             triggerMode: TooltipTriggerMode.manual,
             //TODO 尝试添加动画效果
-            //TODO 添加选择文件夹并搜索文件夹内的音乐文件
             child: IconButton(
               key: ValueKey('add_music_button_ncm'),
               onPressed: () async {
@@ -276,7 +275,7 @@ class Mid extends StatelessWidget {
                           final provider =
                               Provider.of<BottomMusicPlayerProvider>(context,
                                   listen: false);
-                          if (provider.getCurrentMusicIndex == -1) {
+                          if (provider.musicListNotifier.value.isEmpty) {
                             displayInfoBar(context, builder: (context, close) {
                               return InfoBar(
                                 title: const Text('列表为空！'),
@@ -481,14 +480,13 @@ class _LeftState extends State<Left> with SingleTickerProviderStateMixin {
                 ),
               ),
             ),
-            ValueListenableBuilder(
+            ValueListenableBuilder<int>(
                 valueListenable: Provider.of<BottomMusicPlayerProvider>(context,
                         listen: true)
                     .currentMusicIndexNotifier,
-                builder: (context, value, child) {
-                  final provider = Provider.of<BottomMusicPlayerProvider>(
-                      context,
-                      listen: false);
+                builder: (context, currentIndex, child) {
+                  final provider =
+                      Provider.of<BottomMusicPlayerProvider>(context);
                   return Positioned(
                     left: 85,
                     child: SizedBox(
@@ -502,10 +500,8 @@ class _LeftState extends State<Left> with SingleTickerProviderStateMixin {
                           FittedBox(
                             child: Text(
                               provider.musicListNotifier.value.isNotEmpty
-                                  ? provider
-                                          .musicListNotifier
-                                          .value[provider.getCurrentMusicIndex]
-                                          .musicName ??
+                                  ? provider.musicListNotifier
+                                          .value[currentIndex].musicName ??
                                       '未知歌曲名'
                                   : "未知歌曲名",
                               style:
@@ -514,9 +510,7 @@ class _LeftState extends State<Left> with SingleTickerProviderStateMixin {
                           ),
                           Text(
                             provider.musicListNotifier.value.isNotEmpty
-                                ? provider
-                                        .musicListNotifier
-                                        .value[provider.getCurrentMusicIndex]
+                                ? provider.musicListNotifier.value[currentIndex]
                                         .musicArtist ??
                                     '未知歌手'
                                 : "未知歌手",
