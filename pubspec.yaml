@@ -1,5 +1,5 @@
-name: netease_cloud_music
-description: "A new Flutter project."
+name: flutter_music_player
+description: "一个基于Flutter的音乐播放器，UI仿照网易云音乐"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

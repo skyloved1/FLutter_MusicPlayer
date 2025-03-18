@@ -1,4 +1,4 @@
-# netease_cloud_music
+# FlutterMusicPlayer
 
 ## 项目介绍
 * 这是我在学习Flutter过程中的第一个练手项目，是一个基于网易云音乐的音乐播放器，仅支持 **Windows** 平台。
@@ -13,7 +13,7 @@
 |        设置页面         |    |               |
 |   Windows SMTC集成    | √  | 插件有bug，无法完美支持 |
 | 支持网易云Vip本地文件ncm解密播放 | √  | 有缺陷，会破坏封面元数据  |
-> 解密功能参考了[ncm-decrypt](https://github.com/taurusxin/ncmdump)项目，感谢作者的开源。
+> 解密功能参考了[ncmdump](https://github.com/taurusxin/ncmdump)项目，感谢作者的开源。
 
 #### 演示图片
 ![界面](./demo.png)
