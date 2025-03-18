@@ -2,13 +2,13 @@ import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:netease_cloud_music/homePage.dart';
-import 'package:netease_cloud_music/provider/bottomMusicPlayerProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:smtc_windows/smtc_windows.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'globalVariable.dart';
+import 'homePage.dart';
+import 'provider/bottomMusicPlayerProvider.dart';
 
 //TODO smtc BUG 当点击控制中心的按钮后会导致smtc与音频识别壁纸无法更新
 void main() async {

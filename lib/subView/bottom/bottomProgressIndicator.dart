@@ -2,9 +2,10 @@ import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:netease_cloud_music/provider/bottomMusicPlayerProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:smtc_windows/smtc_windows.dart';
+
+import '../../provider/bottomMusicPlayerProvider.dart';
 
 class BottomProgressIndicator extends StatefulWidget {
   BottomProgressIndicator(

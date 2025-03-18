@@ -2,10 +2,10 @@ import 'dart:math';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as material;
-import 'package:netease_cloud_music/globalVariable.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../../globalVariable.dart';
 import '../../provider/bottomMusicPlayerProvider.dart';
 
 GlobalKey<SliverAnimatedListState> listKey =

@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:netease_cloud_music/Icon/Icon.dart';
+
+import '../../Icon/Icon.dart';
 
 List<NavigationPaneItem> myMusicNavigationPaneItems = <NavigationPaneItem>[
   PaneItem(

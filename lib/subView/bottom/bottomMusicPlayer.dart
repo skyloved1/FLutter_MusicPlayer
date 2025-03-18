@@ -7,15 +7,15 @@ import 'package:file_selector/file_selector.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as material;
-import 'package:netease_cloud_music/Icon/Icon.dart';
-import 'package:netease_cloud_music/subView/bottom/bottomProgressIndicator.dart';
 import 'package:path/path.dart' as path;
 import 'package:provider/provider.dart';
 import 'package:smtc_windows/smtc_windows.dart';
 
+import '../../Icon/Icon.dart';
 import '../../globalVariable.dart';
 import '../../ncmDecrypt/libncmdump_ffi.dart';
 import '../../provider/bottomMusicPlayerProvider.dart';
+import 'bottomProgressIndicator.dart';
 import 'musicList.dart';
 
 class BottomMusicPlayer extends StatefulWidget {
