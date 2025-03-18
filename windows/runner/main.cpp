@@ -5,11 +5,11 @@
 #include "utils.h"
 
 // 全局变量，用于存储窗口类名
-const wchar_t gszClassName[] = L"netease_cloud_music";
+const wchar_t gszClassName[] = L"FlutterMusicPlayer";
 
 // 检查是否已经有一个实例在运行
 BOOL IsAlreadyRunning() {
-  HANDLE hMutex = CreateMutex(NULL, TRUE, L"UniqueMutexName");
+  HANDLE hMutex = CreateMutex(NULL, TRUE, L"FlutterMusicPlayerMutexX");
   if (GetLastError() == ERROR_ALREADY_EXISTS) {
     // 如果互斥锁已存在，则释放它并返回TRUE
     CloseHandle(hMutex);
@@ -60,7 +60,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   FlutterWindow window(project);
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
-  if (!window.Create(gszClassName, origin, size)) {
+  if (!window.Create(gszClassName,origin, size)) {
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);

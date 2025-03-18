@@ -28,12 +28,10 @@ void main() async {
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
     titleBarStyle: TitleBarStyle.hidden,
-    title: "音乐播放器",
   );
   windowManager.waitUntilReadyToShow(windowOptions, () async {
     await windowManager.setIcon("assets/img/appicon.ico");
     await windowManager.show();
-    await windowManager.focus();
   });
 
   runApp(MyApp());
